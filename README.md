@@ -1,11 +1,5 @@
 
-How to Use
-Install Dependencies:
-
-bash
-Copiar código
-pip install pwn opcua
-Run Script:
+!!Not tested!!
 
 S7comm STOP:
 ```
