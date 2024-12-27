@@ -9,4 +9,4 @@ cleanup:
 	cd ${Octopus} && \
 	find logs -type f ! -name '.gitkeep' -delete
 start:
-	python3 -m Octopus.main
+	python3 -m otpwntool.main
