@@ -398,88 +398,9 @@ modbus_response_classes = {
 
 
 # TODO: this not work with StreamSocket
-bind_layers(TCP, ModbusHeaderRequest, dport=502)
-bind_layers(TCP, ModbusHeaderResponse, sport=502)
+#bind_layers(TCP, ModbusHeaderRequest, dport=502)
+#bind_layers(TCP, ModbusHeaderResponse, sport=502)
 
 
 
-class Modbus(Protocol):
-    def __init__ (self, **kwargs):
-        super().__init__(**kwargs)
-        self.unit_id = 1
-        self.transaction_id = 1
-        self.protocol_id = 0
-        self.length = 0
-        self.function_code = 0
-        self.data = None
-        self.error = None
-        self.error_code = None
-        self.error_message = None
-        self.exception_code = None
-        self.exception_message = None
-        self.response = None
-        self.pdu = None
-        self.adu = None
-        self.error = None
-        self.error_code = None
-        self.error_message = None
-        self.exception_code = None
-        self.exception_message = None
-        self.data = None
-
-    def start(self):
-        # Craft a Modbus packet to start the PLC (write to a coil)
-        transaction_id = 1
-        protocol_id = 0
-        length = 6
-        unit_id = 1
-        function_code = 5  # Function code to write single coil
-        coil_address = 0
-        coil_value = 0xFF00  # Value to set the coil to ON (start the PLC)
-
-        # Create the Modbus ADU (Application Data Unit)
-        adu = struct.pack('>HHHBBHH', transaction_id, protocol_id, length, unit_id, function_code, coil_address, coil_value)
-        self.send_packet(adu)
-        
-
-    def stop(self):
-        # Craft a Modbus packet to stop the PLC (write to a coil)
-        transaction_id = 1
-        protocol_id = 0
-        length = 6
-        unit_id = 1
-        function_code = 5  # Function code to write single coil
-        coil_address = 0
-        coil_value = 0x0000  # Value to set the coil to OFF (stop the PLC)
-
-        # Create the Modbus ADU (Application Data Unit)
-        adu = struct.pack('>HHHBBHH', transaction_id, protocol_id, length, unit_id, function_code, coil_address, coil_value)
-        self.send_packet(adu)
-
-
-    def read_coil(self):
-        ## craft a packet structured to modbus to read a coil and send it with pwntools
-        ## The packet will be crafted with scapy
-        ## The packet will be sent with pwntools
-        ## The response will be received with pwntools
-        # Craft a Modbus packet to read a coil
-        transaction_id = 1
-        protocol_id = 0
-        length = 6
-        unit_id = 1
-        function_code = 1  # Function code to read coil
-        starting_address = 0
-        quantity_of_coils = 1
-
-        # Create the Modbus ADU (Application Data Unit)
-        adu = struct.pack('>HHHBBHH', transaction_id, protocol_id, length, unit_id, function_code, starting_address, quantity_of_coils)
-        self.send_packet(adu)
-        
-        # Send the packet using pwntools
-        conn = remote('plc_ip_address', 502)  # Replace 'plc_ip_address' with the actual IP address of the PLC
-        conn.send(adu)
-        
-        # Receive the response
-        self.response = conn.recv(1024)
-        conn.close()
-
+       
