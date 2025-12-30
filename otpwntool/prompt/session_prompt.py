@@ -18,7 +18,23 @@ from otpwntool.prompt.helpers import get_tokens
 from prompt_toolkit.completion import NestedCompleter
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 
-fuzzers_id = 0
+
+modules = [
+    'modbus', [
+        {'name': 'modbus_read_coils', 'desc': 'Modbus Read Coils Fuzzer', "options": [
+            {'name': 'target', 'desc': 'Target IP address'},
+            {'name': 'port', 'desc': 'Target Port'},
+            {'name': 'count', 'desc': 'Number of coils to read'},
+            {'name': 'start_address', 'desc': 'Starting address to read from'}
+        ]},
+        {'name': 'modbus_write_single_coil', 'desc': 'Modbus Write Single Coil Fuzzer', "options": [
+            {'name': 'target', 'desc': 'Target IP address'},
+            {'name': 'port', 'desc': 'Target Port'},
+            {'name': 'address', 'desc': 'Address to write to'},
+            {'name': 'value', 'desc': 'Value to write (0 or 1)'}
+        ]},
+    ]
+]
 
 class SessionPrompt(CommandPrompt):
     """
@@ -30,11 +46,8 @@ class SessionPrompt(CommandPrompt):
     def __init__(self):
         super().__init__()
         self.prompt = "[  <b>➜</b>   ]"
-        #self._cmd_load("")
         self.exit_flag = False
-        self.target='127.0.0.1'
-        self.port=102
-        self.action = ''
+        self.module = ''
         self.protocol = ''
 
     # ================================================================#
@@ -63,12 +76,20 @@ class SessionPrompt(CommandPrompt):
         """ Contains the full list of commands"""
         commands = super().get_commands()
         commands.update({
-            'show-options': {
+            'options': {
                 'desc': 'Show a list of fuzzing sessions',
                 'exec': self._cmd_show_options
             },
+            'modules': {
+                'desc': 'Show a list of modules sessions',
+                'exec': self._cmd_show_options
+            },
+            'search': {
+                'desc': 'Search for a specific module',
+                'exec': self._cmd_search
+            },
             'exploit': {
-                'desc': 'Show logs uf the current fuzzing session',
+                'desc': 'Send the packet against the target',
                 'exec': self._cmd_run
             },
             'use': {
@@ -197,6 +218,15 @@ class SessionPrompt(CommandPrompt):
         
         return True
     # --------------------------------------------------------------- #
+    def _cmd_modules(self, tokens):
+        print("\n\n")
+        print("Showing available modules")
+        return None
+
+    def _cmd_search(self, tokens):
+        print("\n\n")
+        print("Searching for a specific module")
+        return None
 
     def _cmd_set(self, tokens):
         """
@@ -254,7 +284,7 @@ class SessionPrompt(CommandPrompt):
     def _cmd_use(self, tokens):
         print("\n\n")
         if tokens[0].lower() == 'modbus':
-            self.prompt = "[  <b>MODBUS</b>  ]"
+            self.prompt = "[  <b>MODBUS</b> ➜   ]"
             self.protocol = 'modbus'
         if tokens[0].lower() == 'opcua':
             self.prompt = "[  <b>OPC UA</b>   ]"
@@ -284,7 +314,11 @@ class SessionPrompt(CommandPrompt):
         print(
             "\n OT Pwnshell - Tool to interact with ICS devices\n"+
             "   -  set VARIABLE VALUE             Set a value to a varible.\n"+
-            "   -  use PROTOCOL                   Use a protocol (S7comm/Modbus/Opcua).\n"+
+            "   -  use PROTOCOL | MODULE          Use a protocol (S7comm/Modbus/Opcua) or use module from protocol.\n"+
+            "   -  modules                        Show available modules.\n"+
+            "   -  protocols                      Show available protocols.\n"+
+            "   -  exploit                        Send the action against the target.\n"+
+            "   -  search PROTOCOL | MODULE       Search for a specific module or modules from a protocol.\n"+
             "   -  show-options                   Show variables of the action to send.\n"+
             "   -  back                           Back when using a protocol.\n"+
             "   -  exit                           Exit the shell.\n"
