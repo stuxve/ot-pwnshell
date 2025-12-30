@@ -2,6 +2,18 @@
 
 Just a shell to pwn OT devices.
 
+## To run it
+
+```
+pip3 install -r requirements
+```
+
+
+```
+python -m otpwntool.main
+```
+
+
 ## TODO
 
 - [ ] Read Coils Modbus
