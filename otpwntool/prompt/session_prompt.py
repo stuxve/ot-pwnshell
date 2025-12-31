@@ -20,20 +20,22 @@ from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 
 
 modules = [
-    'modbus', [
-        {'name': 'modbus_read_coils', 'desc': 'Modbus Read Coils Fuzzer', "options": [
-            {'name': 'target', 'desc': 'Target IP address'},
-            {'name': 'port', 'desc': 'Target Port'},
-            {'name': 'count', 'desc': 'Number of coils to read'},
-            {'name': 'start_address', 'desc': 'Starting address to read from'}
-        ]},
-        {'name': 'modbus_write_single_coil', 'desc': 'Modbus Write Single Coil Fuzzer', "options": [
-            {'name': 'target', 'desc': 'Target IP address'},
-            {'name': 'port', 'desc': 'Target Port'},
-            {'name': 'address', 'desc': 'Address to write to'},
-            {'name': 'value', 'desc': 'Value to write (0 or 1)'}
-        ]},
-    ]
+    {
+        'modbus': [
+            {'name': 'modbus_read_coils', 'desc': 'Modbus Read Coils Fuzzer', "options": [
+                {'name': 'target', 'desc': 'Target IP address', "value": ''},
+                {'name': 'port', 'desc': 'Target Port' , "value": 502},
+                {'name': 'count', 'desc': 'Number of coils to read', "value": 10},
+                {'name': 'start_address', 'desc': 'Starting address to read from', "value": 0}
+            ]},
+            {'name': 'modbus_write_single_coil', 'desc': 'Modbus Write Single Coil Fuzzer', "options": [
+                {'name': 'target', 'desc': 'Target IP address', "value": ''},
+                {'name': 'port', 'desc': 'Target Port', "value": 502},
+                {'name': 'address', 'desc': 'Address to write to', "value": 0},
+                {'name': 'value', 'desc': 'Value to write (0 or 1)', "value": 1}
+            ]}
+        ]
+    }
 ]
 
 class SessionPrompt(CommandPrompt):
@@ -77,23 +79,23 @@ class SessionPrompt(CommandPrompt):
         commands = super().get_commands()
         commands.update({
             'options': {
-                'desc': 'Show a list of fuzzing sessions',
-                'exec': self._cmd_show_options
-            },
-            'modules': {
-                'desc': 'Show a list of modules sessions',
+                'desc': 'Show a list of options of the module selected',
                 'exec': self._cmd_show_options
             },
             'search': {
                 'desc': 'Search for a specific module',
                 'exec': self._cmd_search
             },
+            'modules': {
+                'desc': 'Show available modules',
+                'exec': self._cmd_modules
+            },
             'exploit': {
                 'desc': 'Send the packet against the target',
                 'exec': self._cmd_run
             },
             'use': {
-                'desc': 'Show logs uf the current fuzzing session',
+                'desc': 'Use a protocol or a module from a protocol',
                 'exec': self._cmd_use
             },
             'help': {
@@ -101,11 +103,11 @@ class SessionPrompt(CommandPrompt):
                 'exec': self._cmd_help
             },
             'back': {
-                'desc': 'Kill a session',
+                'desc': 'Deselect a protocol or a module',
                 'exec': self._cmd_back
             },
             'set': {
-                'desc': 'Create a fuzzing session',
+                'desc': 'Set a value to an option of the module',
                 'exec': self._cmd_set
             },
         })
@@ -219,9 +221,17 @@ class SessionPrompt(CommandPrompt):
         return True
     # --------------------------------------------------------------- #
     def _cmd_modules(self, tokens):
-        print("\n\n")
-        print("Showing available modules")
-        return None
+        if self.protocol == '' or self.protocol is None:
+            print("\n\n")
+            print("Please select a protocol to see available modules.")
+            return None
+        else:
+            print("\n\n")
+            print(f"Available modules for protocol {self.protocol.upper()}:")
+            protocol_modules = [module['name'] for module in modules[0][self.protocol]]
+            for mod in protocol_modules:
+                print(f" - {mod}")
+            return None
 
     def _cmd_search(self, tokens):
         print("\n\n")
@@ -264,13 +274,15 @@ class SessionPrompt(CommandPrompt):
     # --------------------------------------------------------------- #
 
     def _cmd_show_options(self, _):
-        print(
-            "\n Options for the action:\n"+
-            f"   -  target {self.target}               See sessions opened or fuzzing modules loaded fuzzers.\n"+
-            f"   -  port {self.port}                   See sessions opened or fuzzing modules loaded sessions.\n"
-            f"   -  action {self.action}                 (0 - Read Coil / 1 - Start / 2 - Stop)\n"
-        ) 
-        print("\n\n")
+        if self.module == '':
+            print("\n\n")
+            print("No module selected. Use the 'use' command to select a module.")
+            return None
+        else:
+            print("\n\n")
+            print(f"Options for module {self.module}:")
+            for option in self.options:
+                print(f" - {option['name']}: {option['value']}")
         return None
 
     # --------------------------------------------------------------- #
@@ -286,18 +298,35 @@ class SessionPrompt(CommandPrompt):
         if tokens[0].lower() == 'modbus':
             self.prompt = "[  <b>MODBUS</b> ➜   ]"
             self.protocol = 'modbus'
+            return
         if tokens[0].lower() == 'opcua':
             self.prompt = "[  <b>OPC UA</b>   ]"
             self.protocol = 'opcua'
+            return
         if tokens[0].lower() == 's7comm':
             self.prompt = "[  <b>S7COMM</b> ]"
             self.protocol = 's7comm'
-        
-        
-        if self.protocol != 'modbus' and self.protocol != 'opcua' and self.protocol != 's7comm':
-                self._print_error('Protocol not selected')
+            return
+
+        selected = tokens[0].lower()
+
+        if self.protocol == None:
+            self._print_error('Protocol not found')
+            return
+
+        if self.protocol is not None:
+            protocol_modules = [module['name'] for module in modules[0][self.protocol]]
+            if selected in protocol_modules:
+                self.module = selected
+                self.options = next(module['options'] for module in modules[0][self.protocol] if module['name'] == selected)
+                self.prompt = f"[  <b>{self.protocol.upper()}</b> ➜  <b>{selected}</b>   ]"
                 return
-        return None
+            else:
+                self._print_error('Module not found in the selected protocol')
+                return
+        else:
+            self._print_error('Protocol not selected')
+            return
 
     # --------------------------------------------------------------- #
 
