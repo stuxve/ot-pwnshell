@@ -14,7 +14,7 @@ from .prompt import CommandPrompt
 #from Octopus import constants
 #from Octopus.fuzzer import Fuzzer
 from ..constants import *
-from otpwntool.prompt.helpers import get_tokens
+from icspwnshell.prompt.helpers import get_tokens
 from prompt_toolkit.completion import NestedCompleter
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 

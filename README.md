@@ -10,7 +10,7 @@ pip3 install -r requirements
 
 ## To run it
 ```
-python -m otpwntool.main
+python -m icspwnshell.main
 ```
 
 

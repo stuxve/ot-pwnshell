@@ -1,9 +1,9 @@
 #! /usr/bin/env python
 # coding:utf-8
 # Author: WenZhe Zhu
-from otpwntool.interfaces.protocol import Base
-from otpwntool.protocols.cotp import *
-from otpwntool.protocols.s7comm import *
+from icspwnshell.interfaces.protocol import Base
+from icspwnshell.protocols.cotp import *
+from icspwnshell.protocols.s7comm import *
 from scapy.supersocket import StreamSocket
 import socket
 

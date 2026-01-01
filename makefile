@@ -1,4 +1,4 @@
-FOLDER=otpwntool
+FOLDER=icspwnshell
 DOCKERCOMM=docker
 
 setup:
@@ -9,4 +9,4 @@ cleanup:
 	cd ${Octopus} && \
 	find logs -type f ! -name '.gitkeep' -delete
 start:
-	python -m otpwntool.main
+	python -m icspwnshell.main
