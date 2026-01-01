@@ -267,9 +267,16 @@ class SessionPrompt(CommandPrompt):
                 self.port = value
         
     def _cmd_back(self, _):
-
-        self.prompt = "[  <b>➜</b>   ]"
-        self.protocol = ''
+        if self.module != '' or self.module is not None:
+            self.module = ''
+            self.options = []
+            self.prompt = f"[  <b>{self.protocol.upper()}</b> ➜   ]"
+            return
+        if self.protocol != '' or self.protocol is not None:
+            self.protocol = ''
+            self.prompt = "[  <b>➜</b>   ]"
+            return
+        
 
     # --------------------------------------------------------------- #
 
@@ -319,7 +326,7 @@ class SessionPrompt(CommandPrompt):
             if selected in protocol_modules:
                 self.module = selected
                 self.options = next(module['options'] for module in modules[0][self.protocol] if module['name'] == selected)
-                self.prompt = f"[  <b>{self.protocol.upper()}</b> ➜  <b>{selected}</b>   ]"
+                self.prompt = f"[  <b>{self.protocol.upper()}</b> ➜  <b>{selected}</b>  ]"
                 return
             else:
                 self._print_error('Module not found in the selected protocol')
