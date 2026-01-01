@@ -2,13 +2,13 @@
 
 Just a shell to pwn OT devices.
 
-## To run it
+## To install it
 
 ```
 pip3 install -r requirements
 ```
 
-
+## To run it
 ```
 python -m otpwntool.main
 ```
