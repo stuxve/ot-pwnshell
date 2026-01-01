@@ -1,4 +1,4 @@
-from .protocol import Protocol
+from ..interfaces.protocol import Protocol
 from scapy.all import *
 from pwn import *
 from scapy.all import conf
