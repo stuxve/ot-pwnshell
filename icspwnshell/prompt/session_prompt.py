@@ -103,9 +103,13 @@ class SessionPrompt(CommandPrompt):
                 'desc': 'Send the packet against the target',
                 'exec': self._cmd_run
             },
-            'use': {
-                'desc': 'Use a protocol or a module from a protocol',
-                'exec': self._cmd_use
+            "use-protocol": {
+                'desc': 'Use a protocol (Modbus/S7comm/Opcua)',
+                'exec': self._cmd_use_protocol
+            },
+            "use-module": {
+                'desc': 'Use a protocol (Modbus/S7comm/Opcua)',
+                'exec': self._cmd_use_module
             },
             'help': {
                 'desc': 'Show all available commands',
@@ -323,7 +327,53 @@ class SessionPrompt(CommandPrompt):
         print("Running the action")
         return None
     # --------------------------------------------------------------- #
+    def _cmd_use_protocol(self, tokens):
+        print("\n\n")
+        if len(tokens) == 0:
+            self._print_error('Usage: use-protocol [PROTOCOL]')
+            return
 
+        selected = tokens[0].lower()
+
+        # Check if the selected token matches a protocol
+        if selected in ['modbus', 'opcua', 's7comm']:
+            self.prompt = f"[  <b>{selected.upper()}</b> ➜   ]"
+            self.protocol = selected
+            self.module = ''
+            self.options = []
+            return
+
+        # If no match is found, print an error
+        self._print_error('Protocol not found')
+        return
+    def _cmd_use_module(self, tokens):
+        print("\n\n")
+        if len(tokens) == 0:
+            self._print_error('Usage: use-module [MODULE]')
+            return
+
+        selected = tokens[0].lower()
+
+        # Check if the selected token matches a module within the current protocol
+        if self.protocol:
+            protocol_modules = None
+            for protocol_dict in modules:
+                if self.protocol in protocol_dict:
+                    protocol_modules = protocol_dict[self.protocol]
+                    break
+
+            if protocol_modules:
+                module_names = [module['name'] for module in protocol_modules]
+                if selected in module_names:
+                    self.module = selected
+                    self.options = next(module['options'] for module in protocol_modules if module['name'] == selected)
+                    self.prompt = f"[  <b>{self.protocol.upper()}</b> ➜  <b>{selected}</b>  ]"
+                    return
+
+        # If no match is found, print an error
+        self._print_error(f'Module not found in the selected protocol {self.protocol} or protocol not selected')
+        return
+    
     def _cmd_use(self, tokens):
         print("\n\n")
         if len(tokens) == 0:
