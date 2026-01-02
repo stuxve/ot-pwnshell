@@ -1,6 +1,6 @@
-# OT PWNSHELL
+# ICS PWNSHELL
 
-Just a shell to pwn OT devices.
+Just a shell to pwn ICS devices.
 
 ## To install it
 
