@@ -23,25 +23,18 @@ modules = [
     {
         'modbus': [
             {'name': 'modbus_read_coils', 'desc': 'Modbus Read Coils Fuzzer', "options": [
-                {'name': 'target', 'desc': 'Target IP address', "value": ''},
-                {'name': 'port', 'desc': 'Target Port' , "value": 502},
-                {'name': 'count', 'desc': 'Number of coils to read', "value": 10},
-                {'name': 'start_address', 'desc': 'Starting address to read from', "value": 0}
+                {'name': 'count', 'desc': 'Number of coils to read', "mandatory":True, "value": 10},
+                {'name': 'start_address', 'desc': 'Starting address to read from', "mandatory":True, "value": 0}
             ]},
             {'name': 'modbus_write_single_coil', 'desc': 'Modbus Write Single Coil Fuzzer', "options": [
-                {'name': 'target', 'desc': 'Target IP address', "value": ''},
-                {'name': 'port', 'desc': 'Target Port', "value": 502},
-                {'name': 'address', 'desc': 'Address to write to', "value": 0},
-                {'name': 'value', 'desc': 'Value to write (0 or 1)', "value": 1}
+                {'name': 'address', 'desc': 'Address to write to', "mandatory":True, "value": 0},
+                {'name': 'value', 'desc': 'Value to write (0 or 1)', "mandatory":True, "value": 1}
             ]}
         ]
     },
     {
         's7comm': [
-            {'name': 'info_device', 'desc': 'S7comm Info Device Module', "options": [
-                {'name': 'target', 'desc': 'Target IP address', "value": ''},
-                {'name': 'port', 'desc': 'Target Port' , "value": 102}
-            ]}
+            {'name': 'info_device', 'desc': 'S7comm Info Device Module', "options": []}
         ]
     }
     
@@ -60,6 +53,8 @@ class SessionPrompt(CommandPrompt):
         self.exit_flag = False
         self.module = ''
         self.protocol = ''
+        self.target = ''
+        self.port = 0
 
     # ================================================================#
     # CommandPrompt Overridden Functions                              #
@@ -291,6 +286,19 @@ class SessionPrompt(CommandPrompt):
             if value < 0 or value > 65535:
                 self.port = value
 
+        # Check if a module is selected
+        if self.module == '':
+            self._print_error('No module selected. Use the "use" command to select a module.')
+            return
+        # Find the option in the selected module
+        option_found = False
+        for option in self.options:
+            if option['name'].lower() == variable.lower():
+                option['value'] = value
+                option_found = True
+                print(f"Set {variable} to {value} in module {self.module}")
+                break
+
 
     # --------------------------------------------------------------- #
     def _cmd_back(self, _):
@@ -315,16 +323,29 @@ class SessionPrompt(CommandPrompt):
             return None
         else:
             print("\n\n")
-            print(f"Options for module {self.module}:")
-            for option in self.options:
-                print(f" - {option['name']}: {option['value']}")
+            print("Target options:")
+            print(f" - LHOST: {self.target}")
+            print(f" - LPORT: {self.port}\n")
+            if len(modules[self.protocol][self.module]['options']) > 0:
+                print(f"Options for module {self.module}:")
+                for option in self.options:
+                    print(f" - {option['name']}: {option['value']}")
         return None
 
     # --------------------------------------------------------------- #
 
     def _cmd_run(self, _):
         print("\n\n")
-        print("Running the action")
+        print("Running the module...")
+
+        if self.module == '':
+            print("No module selected. Use the 'use' command to select a module.")
+        
+        if self.module == 'modbus_read_coils':
+            print(f"Reading {self.get_option_value('count')} coils from {self.get_option_value('target')} starting at address {self.get_option_value('start_address')} on port {self.get_option_value('port')}")
+            # Here you would add the actual code to perform the Modbus read coils operation
+
+
         return None
     # --------------------------------------------------------------- #
     def _cmd_use_protocol(self, tokens):

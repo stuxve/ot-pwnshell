@@ -19,7 +19,7 @@ python -m icspwnshell.main
 - [ ] Read Coils Modbus
 - [ ] Search Profinet
 - [ ] Write Coils
-- [ ] Whoami packet in S7comm
+- [ ] Client S7 connection (aka whoami)
 
 
 ## Research:
