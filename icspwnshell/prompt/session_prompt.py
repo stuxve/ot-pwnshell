@@ -7,6 +7,8 @@ from prompt_toolkit import HTML, print_formatted_text
 from prompt_toolkit.styles import Style, merge_styles
 from prompt_toolkit.shortcuts import prompt
 import re
+
+from icspwnshell.protocols.modbus import Modbus
 #from Octopus.prompt.helpers import get_tokens
 
 
@@ -511,3 +513,29 @@ class SessionPrompt(CommandPrompt):
         
 
     # --------------------------------------------------------------- #
+    # Functions of the modules                                        #
+    # --------------------------------------------------------------- #
+
+    def modbus_read_coils(self):
+        """
+        Function to read coils from a Modbus device.
+        
+        Returns:
+            None
+        """
+        print("Reading coils from Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        mb_cl.read_coils()
+    
+
+    def client_s7_connection(self):
+        print("Establishing S7comm client connection...")
+        return None
+
+    def search_profinet(self):
+        
+        print("Searching for Profinet devices...")
+
+
+        return None

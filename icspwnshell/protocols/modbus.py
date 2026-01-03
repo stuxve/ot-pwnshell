@@ -1,4 +1,6 @@
 from .modbus_structure import *
+import socket
+
 class Modbus():
     def __init__ (self, **kwargs):
         super().__init__(**kwargs)
@@ -16,6 +18,9 @@ class Modbus():
         self.data = None
         self.length = 0
         self.adu = None
+        self.connection = None
+        self.target = None
+        self.port = None
         #self.error = None
         #self.error_code = None
         #self.error_message = None
@@ -24,38 +29,46 @@ class Modbus():
         #self.data = None
     
 
-    def read_coil(self):
+    def close_connection(self):
+        # Close the connection
+        if self.connection:
+            self.connection.close()
+            self.connection = None
 
-        # Crear el paquete de solicitud
-        request = ModbusHeaderRequest(func_code=0x01) / ReadCoilsRequest(ReferenceNumber=0x0000, BitCount=0x0010)
-        
-        ##Parse packet
-        #try:
-            #packet = ModbusHeaderRequest(request)
-            #payload_class = packet.guess_payload_class(request[7:])
-            #if payload_class:
-                #packet = packet / payload_class(request[7:])
-            #return packet
-        #except Exception:
-            #print("Error al analizar el paquete, paquete")
-            #return
+    def init_connection(self, target, port, timeout=5):
+        # Initialize connection (e.g., TCP socket)
+        if self.connection is None:
+            self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.connection.settimeout(self.timeout)
+            self.connection.connect((self.target, self.port))
 
+    def read_coils(self, target, port, count, start_address, timeout=5):
+        # Initialize the connection with the given target and port
+        self.init_connection(target, port, timeout)
 
-        # Enviar el paquete (esto es un ejemplo, debes reemplazarlo con tu método de envío)
+        # Create the request packet using the provided start_address and count
+        request = ModbusHeaderRequest(func_code=0x01) / ReadCoilsRequest(
+            ReferenceNumber=start_address,
+            BitCount=count
+        )
+
+        # Send the request packet
         self.send_packet(request)
-        
-        # Recibir el paquete de respuesta (esto es un ejemplo, debes reemplazarlo con tu método de recepción)
+
+        # Receive the response packet
         response = self.receive_packet()
-        
-        # Analizar el paquete de respuesta
+
+        # Parse the response packet
         parsed_response = ModbusHeaderResponse(response)
-        
-        # Procesar la respuesta
+
+        # Process the response
         if parsed_response.func_code == 0x01:
             coils_status = parsed_response.payload.CoilsStatus
             print(f"Coils Status: {coils_status}")
+            return coils_status
         else:
-            print("Error en la respuesta")
+            print("Error in the response")
+            return None
     
     def write_coil(self):
         self.function_code = 0x05
@@ -210,6 +223,7 @@ class Modbus():
         # Recibir la respuesta del servidor
         response = self.connection.recv()
         return response
+    
 def parse_packet(raw_packet):
     # Intentar analizar como ModbusHeaderRequest
     try:
