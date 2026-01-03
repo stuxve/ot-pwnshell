@@ -21,7 +21,8 @@ from icspwnshell.prompt.helpers import get_tokens
 from prompt_toolkit.completion import NestedCompleter
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 import optparse  # Add this import at the top of the file
-
+import io
+from contextlib import redirect_stdout, redirect_stderr
 
 modules = [
     {
@@ -349,7 +350,7 @@ class SessionPrompt(CommandPrompt):
 
     def _cmd_run(self, _):
         print("\n\n")
-        print("Running the module...")
+        print("[!] Running the module...")
 
         if self.module == '':
             print("No module selected. Use the 'use' command to select a module.")
@@ -360,7 +361,7 @@ class SessionPrompt(CommandPrompt):
             self.modbus_read_coils()
         
         if self.module == 'search_profinet':
-            print("Searching for Profinet devices...")
+            print("[!] Searching for Profinet devices...")
             # Here you would add the actual code to perform the Profinet search operation
             self.search_profinet()
         
@@ -560,12 +561,13 @@ class SessionPrompt(CommandPrompt):
         src_mac = profinet_cl.get_src_mac()
 
         # Use optparse directly instead of referencing it as an attribute of profinet_cl
-        parser = optparse.OptionParser()
-        parser.add_option('-i', dest="src_iface", 
-                        default="", help="source network interface")
-        options, args = parser.parse_args()
+        #parser = optparse.OptionParser()
+        #parser.add_option('-i', dest="src_iface", 
+        #                default="", help="source network interface")
+        #options, args = parser.parse_args()
         
-        src_iface = options.src_iface or profinet_cl.get_src_iface()
+        #src_iface = options.src_iface or profinet_cl.get_src_iface()
+        src_iface = profinet_cl.get_src_iface()
         
         # Run sniffer
         t = threading.Thread(target=profinet_cl.sniff_packets, args=(src_iface,))
@@ -575,10 +577,22 @@ class SessionPrompt(CommandPrompt):
         # Create and send broadcast Profinet packet
         payload = 'fefe 05 00 04010002 0080 0004 ffff '
         payload = payload.replace(' ', '')
+        buf = io.StringIO()
 
         pp = Ether(type=0x8892, src=src_mac, dst=profinet_cl.cfg_dst_mac) / bytes.fromhex(payload)
-        ans, unans = srp(pp)
+        print("[>] Sending Profinet discovery packet...")
+        with redirect_stdout(buf), redirect_stderr(buf):
+            ans, unans = srp(pp)
 
+        print("\n[<] Profinet discovery packets sent.\n")
+        for line in buf.getvalue().splitlines():
+            line = line.strip()
+
+            if not line or line in {"^C"}:
+                continue
+
+            else:
+                print(f"[!] {line}")
         # Wait for sniffer to finish
         t.join()
 
@@ -597,14 +611,21 @@ class SessionPrompt(CommandPrompt):
                 result[p.src]['subnet_mask'] = subnet_mask
                 result[p.src]['standard_gateway'] = standard_gateway
 
-        print("[1] Found %d devices" % len(result))
+        print("[!] Found %d devices" % len(result))
         print("[!] {0:17} : {1:15} : {2:15} : {3:9} : {4:9} : {5:11} : {6:15} : {7:15} : {8:15}".format(
-            'mac address', 'type of station', 'name of station', 'vendor id', 
-            'device id', 'device role', 'ip address', 'subnet mask', 'standard gateway'
+            'MAC Address', 
+            'Type of Station', 
+            'Name of Station', 
+            'Vendor ID', 
+            'Device ID', 
+            'Device Role', 
+            'IP Address', 
+            'Subnet Mask', 
+            'Standard Gateway'
         ))
         for (mac, profinet_info) in result.items():
             p = result[mac]
-            print("{0:17} : {1:15} : {2:15} : {3:9} : {4:9} : {5:11} : {6:15} : {7:15} : {8:15}".format(
+            print("[!] {0:17} : {1:15} : {2:15} : {3:9} : {4:9} : {5:11} : {6:15} : {7:15} : {8:15}".format(
                 mac, 
                 p['type_of_station'], 
                 p['name_of_station'], 
