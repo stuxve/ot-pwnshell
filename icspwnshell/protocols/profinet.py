@@ -10,9 +10,7 @@ from binascii import hexlify, unhexlify
 from scapy.all import conf, sniff, srp, Ether
 
 class Profinet:
-    def __init__(self, target, port):
-        self.target = target
-        self.port = port
+    def __init__(self):
         self.cfg_dst_mac = '01:0e:cf:00:00:00' # Siemens family
         self.cfg_sniff_time = 2 # seconds
         self.sniffed_packets = None

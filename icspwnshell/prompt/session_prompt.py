@@ -20,6 +20,7 @@ from ..constants import *
 from icspwnshell.prompt.helpers import get_tokens
 from prompt_toolkit.completion import NestedCompleter
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+import optparse  # Add this import at the top of the file
 
 
 modules = [
@@ -38,6 +39,11 @@ modules = [
     {
         's7comm': [
             {'name': 'info_device', 'desc': 'S7comm Info Device Module', "options": []}
+        ]
+    },
+    {
+        'profinet': [
+            {'name': 'search_profinet', 'desc': 'Search for Profinet Devices', "options": []}
         ]
     }
     
@@ -120,6 +126,10 @@ class SessionPrompt(CommandPrompt):
             'set': {
                 'desc': 'Set a value to an option of the module',
                 'exec': self._cmd_set
+            },
+            'run': {
+                'desc': 'Run the selected module',
+                'exec': self._cmd_run
             },
         })
         
@@ -347,7 +357,17 @@ class SessionPrompt(CommandPrompt):
         if self.module == 'modbus_read_coils':
             print(f"Reading {self.get_option_value('count')} coils from {self.get_option_value('target')} starting at address {self.get_option_value('start_address')} on port {self.get_option_value('port')}")
             # Here you would add the actual code to perform the Modbus read coils operation
-
+            self.modbus_read_coils()
+        
+        if self.module == 'search_profinet':
+            print("Searching for Profinet devices...")
+            # Here you would add the actual code to perform the Profinet search operation
+            self.search_profinet()
+        
+        if self.module == 'info_device':
+            print(f"Getting S7comm device info from {self.get_option_value('target')} on port {self.get_option_value('port')}")
+            # Here you would add the actual code to perform the S7comm info device operation
+            self.client_s7_connection()
 
         return None
     # --------------------------------------------------------------- #
@@ -360,7 +380,7 @@ class SessionPrompt(CommandPrompt):
         selected = tokens[0].lower()
 
         # Check if the selected token matches a protocol
-        if selected in ['modbus', 'opcua', 's7comm']:
+        if selected in ['modbus', 'profinet', 's7comm']:
             self.prompt = f"[  <b>{selected.upper()}</b> ➜   ]"
             self.protocol = selected
             self.module = ''
@@ -536,32 +556,33 @@ class SessionPrompt(CommandPrompt):
 
     def search_profinet(self):
         
-        print("Searching for Profinet devices...")
         profinet_cl = Profinet()
         src_mac = profinet_cl.get_src_mac()
-        parser = profinet_cl.optparse.OptionParser()
+
+        # Use optparse directly instead of referencing it as an attribute of profinet_cl
+        parser = optparse.OptionParser()
         parser.add_option('-i', dest="src_iface", 
                         default="", help="source network interface")
         options, args = parser.parse_args()
         
         src_iface = options.src_iface or profinet_cl.get_src_iface()
         
-        # run sniffer
+        # Run sniffer
         t = threading.Thread(target=profinet_cl.sniff_packets, args=(src_iface,))
         t.setDaemon(True)
         t.start()
 
-        # create and send broadcast profinet packet
-        payload =  'fefe 05 00 04010002 0080 0004 ffff '
+        # Create and send broadcast Profinet packet
+        payload = 'fefe 05 00 04010002 0080 0004 ffff '
         payload = payload.replace(' ', '')
 
-        pp = Ether(type=0x8892, src=src_mac, dst=profinet_cl.cfg_dst_mac)/payload.decode('hex')
+        pp = Ether(type=0x8892, src=src_mac, dst=profinet_cl.cfg_dst_mac) / bytes.fromhex(payload)
         ans, unans = srp(pp)
 
-        # wait sniffer...
+        # Wait for sniffer to finish
         t.join()
 
-        # parse and print result
+        # Parse and print result
         result = {}
         for p in profinet_cl.sniffed_packets:
             if hex(p.type) == '0x8892' and p.src != src_mac:
@@ -576,22 +597,22 @@ class SessionPrompt(CommandPrompt):
                 result[p.src]['subnet_mask'] = subnet_mask
                 result[p.src]['standard_gateway'] = standard_gateway
 
-        print("found %d devices" % len(result))
-        print("{0:17} : {1:15} : {2:15} : {3:9} : {4:9} : {5:11} : {6:15} : {7:15} : {8:15}").format('mac address', 'type of station', 
-                                                                                                'name of station', 'vendor id', 
-                                                                                                'device id', 'device role', 'ip address',
-                                                                                                'subnet mask', 'standard gateway')
+        print("[1] Found %d devices" % len(result))
+        print("[!] {0:17} : {1:15} : {2:15} : {3:9} : {4:9} : {5:11} : {6:15} : {7:15} : {8:15}".format(
+            'mac address', 'type of station', 'name of station', 'vendor id', 
+            'device id', 'device role', 'ip address', 'subnet mask', 'standard gateway'
+        ))
         for (mac, profinet_info) in result.items():
             p = result[mac]
-            print("{0:17} : {1:15} : {2:15} : {3:9} : {4:9} : {5:11} : {6:15} : {7:15} : {8:15}").format(mac, 
-                                                                                                    p['type_of_station'], 
-                                                                                                    p['name_of_station'], 
-                                                                                                    p['vendor_id'],
-                                                                                                    p['device_id'],
-                                                                                                    p['device_role'],
-                                                                                                    p['ip_address'],
-                                                                                                    p['subnet_mask'],
-                                                                                                    p['standard_gateway'],
-                                                                                                    )
-
+            print("{0:17} : {1:15} : {2:15} : {3:9} : {4:9} : {5:11} : {6:15} : {7:15} : {8:15}".format(
+                mac, 
+                p['type_of_station'], 
+                p['name_of_station'], 
+                p['vendor_id'],
+                p['device_id'],
+                p['device_role'],
+                p['ip_address'],
+                p['subnet_mask'],
+                p['standard_gateway']
+            ))
         return None
