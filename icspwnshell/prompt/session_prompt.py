@@ -9,9 +9,10 @@ from prompt_toolkit.shortcuts import prompt
 import re
 
 from icspwnshell.protocols.modbus import Modbus
+from icspwnshell.protocols.profinet import Profinet
 #from Octopus.prompt.helpers import get_tokens
 
-
+from scapy.all import conf, sniff, srp, Ether
 from .prompt import CommandPrompt
 #from Octopus import constants
 #from Octopus.fuzzer import Fuzzer
@@ -536,6 +537,61 @@ class SessionPrompt(CommandPrompt):
     def search_profinet(self):
         
         print("Searching for Profinet devices...")
+        profinet_cl = Profinet()
+        src_mac = profinet_cl.get_src_mac()
+        parser = profinet_cl.optparse.OptionParser()
+        parser.add_option('-i', dest="src_iface", 
+                        default="", help="source network interface")
+        options, args = parser.parse_args()
+        
+        src_iface = options.src_iface or profinet_cl.get_src_iface()
+        
+        # run sniffer
+        t = threading.Thread(target=profinet_cl.sniff_packets, args=(src_iface,))
+        t.setDaemon(True)
+        t.start()
 
+        # create and send broadcast profinet packet
+        payload =  'fefe 05 00 04010002 0080 0004 ffff '
+        payload = payload.replace(' ', '')
+
+        pp = Ether(type=0x8892, src=src_mac, dst=profinet_cl.cfg_dst_mac)/payload.decode('hex')
+        ans, unans = srp(pp)
+
+        # wait sniffer...
+        t.join()
+
+        # parse and print result
+        result = {}
+        for p in profinet_cl.sniffed_packets:
+            if hex(p.type) == '0x8892' and p.src != src_mac:
+                result[p.src] = {'load': p.load}
+                type_of_station, name_of_station, vendor_id, device_id, device_role, ip_address, subnet_mask, standard_gateway = profinet_cl.parse_load(p.load, p.src)
+                result[p.src]['type_of_station'] = type_of_station
+                result[p.src]['name_of_station'] = name_of_station
+                result[p.src]['vendor_id'] = vendor_id
+                result[p.src]['device_id'] = device_id
+                result[p.src]['device_role'] = device_role
+                result[p.src]['ip_address'] = ip_address
+                result[p.src]['subnet_mask'] = subnet_mask
+                result[p.src]['standard_gateway'] = standard_gateway
+
+        print("found %d devices" % len(result))
+        print("{0:17} : {1:15} : {2:15} : {3:9} : {4:9} : {5:11} : {6:15} : {7:15} : {8:15}").format('mac address', 'type of station', 
+                                                                                                'name of station', 'vendor id', 
+                                                                                                'device id', 'device role', 'ip address',
+                                                                                                'subnet mask', 'standard gateway')
+        for (mac, profinet_info) in result.items():
+            p = result[mac]
+            print("{0:17} : {1:15} : {2:15} : {3:9} : {4:9} : {5:11} : {6:15} : {7:15} : {8:15}").format(mac, 
+                                                                                                    p['type_of_station'], 
+                                                                                                    p['name_of_station'], 
+                                                                                                    p['vendor_id'],
+                                                                                                    p['device_id'],
+                                                                                                    p['device_role'],
+                                                                                                    p['ip_address'],
+                                                                                                    p['subnet_mask'],
+                                                                                                    p['standard_gateway'],
+                                                                                                    )
 
         return None
