@@ -386,6 +386,7 @@ class SessionPrompt(CommandPrompt):
             self.protocol = selected
             self.module = ''
             self.options = []
+            self.update_nested_completer()
             return
 
         # If no match is found, print an error
@@ -520,7 +521,30 @@ class SessionPrompt(CommandPrompt):
             None
         """
         print_formatted_text(HTML('<b>OT pwnshell</b>:'))
+    def update_nested_completer(self):
+        """
+        Dynamically update the NestedCompleter based on the current protocol and module.
 
+        Returns:
+            None
+        """
+        nested_commands = {}
+
+        # Add protocol-specific commands
+        if self.protocol:
+            protocol_modules = next((protocol_dict[self.protocol] for protocol_dict in modules if self.protocol in protocol_dict), [])
+            module_names = [module['name'] for module in protocol_modules]
+            nested_commands['use-module'] = {name: None for name in module_names}
+
+        # Add module-specific options
+        if self.module:
+            module_options = next((module['options'] for protocol_dict in modules if self.protocol in protocol_dict
+                                for module in protocol_dict[self.protocol] if module['name'] == self.module), [])
+            option_names = [option['name'] for option in module_options]
+            nested_commands['set'] = {name: None for name in option_names}
+
+        # Update the completer
+        self.update_nested_commands(nested_commands)
     # --------------------------------------------------------------- #
 
     def exit_message(self):
