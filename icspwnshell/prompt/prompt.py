@@ -8,9 +8,9 @@ import sys
 
 from .helpers import get_tokens
 from .commands import CommandHandler, CommandCompleter, COMMANDS, NESTED_COMMANDS
-from prompt_toolkit.completion import NestedCompleter, merge_completers
+from prompt_toolkit.completion import NestedCompleter, merge_completers, DynamicCompleter
 from prompt_toolkit.history import FileHistory
-
+from icspwnshell.modules.modules import MODULES as modules
 
 class CommandPrompt(object):
     def __init__(self) -> None:
@@ -29,10 +29,13 @@ class CommandPrompt(object):
             lock (Lock): Lock to ensure safe access to shared resources.
             history (FileHistory): Command history stored in a file.
         """
+        self.protocol = None
+        self.module = None
         self.commands = self.get_commands()
         self.nested_commands = self.get_nested_commands()
         self.cmd_handler = CommandHandler(self.commands)
         self.completer = merge_completers([CommandCompleter(self.commands), NestedCompleter.from_nested_dict(self.nested_commands)], deduplicate = True)
+        #self.completer = DynamicCompleter(self._get_completer)
         self.style = self.get_style()
         self._break = False
         self.auto_suggest = AutoSuggestFromHistory()
@@ -44,7 +47,36 @@ class CommandPrompt(object):
         self.history = FileHistory('.octopus_command_history')
 
     # --------------------------------------------------------------- #
+    def _get_completer(self):
+        return NestedCompleter.from_nested_dict(self._build_nested_commands())
+    
+    def _build_nested_commands(self):
+        nested = {
+            'use-protocol': {p: None for p in ['modbus', 'profinet', 's7comm']},
+        }
 
+        if self.protocol:
+            protocol_modules = next(
+                (d[self.protocol] for d in modules if self.protocol in d),
+                []
+            )
+            #nested['use-module'] = {
+            #    m['name']: None for m in protocol_modules
+            #}
+
+        if self.module:
+            module_options = next(
+                (m['options']
+                for d in modules if self.protocol in d
+                for m in d[self.protocol]
+                if m['name'] == self.module),
+                []
+            )
+            nested['set'] = {
+                o['name']: None for o in module_options
+            }
+
+        return nested
     def get_commands(self):
         """
         Retrieve the available commands.
@@ -70,8 +102,14 @@ class CommandPrompt(object):
         Args:
             commands (dict): A dictionary containing the commands to be added.
         """
-        self.nested_commands.update(commands)
-        self.completer = merge_completers([CommandCompleter(self.commands), NestedCompleter.from_nested_dict(self.nested_commands)], deduplicate = True)
+        # REPLACE instead of UPDATE - this is the critical fix!
+        self.nested_commands = commands.copy()  # Or just: self.nested_commands = commands
+        
+        #self.commands = self.get_commands()
+        self.completer = merge_completers([
+            CommandCompleter(self.commands), 
+            NestedCompleter.from_nested_dict(self.nested_commands)
+        ], deduplicate=True)
         self.prompt_session.completer = self.completer
 
     def set_completer(self, completer):
@@ -193,7 +231,7 @@ class CommandPrompt(object):
         """
         return None
 
-
+    
     # --------------------------------------------------------------- #
 
     def start_prompt(self) -> None:

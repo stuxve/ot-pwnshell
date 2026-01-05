@@ -30,6 +30,9 @@ class CommandHandler(object):
         Returns:
             None
         """
+        print(f"DEBUG: Looking for command: '{cmd[0]}'")
+        print(f"DEBUG: Available commands: {list(self.commands.keys())}")
+    
         if cmd[0] in self.commands:
             entry = self.commands[cmd[0]]
             if 'exec' in entry and entry['exec']:

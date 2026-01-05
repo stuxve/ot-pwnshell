@@ -18,37 +18,11 @@ from .prompt import CommandPrompt
 #from Octopus.fuzzer import Fuzzer
 from ..constants import *
 from icspwnshell.prompt.helpers import get_tokens
-from prompt_toolkit.completion import NestedCompleter
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 import optparse  # Add this import at the top of the file
 import io
 from contextlib import redirect_stdout, redirect_stderr
+from icspwnshell.modules.modules import MODULES as modules
 
-modules = [
-    {
-        'modbus': [
-            {'name': 'modbus_read_coils', 'desc': 'Modbus Read Coils Fuzzer', "options": [
-                {'name': 'count', 'desc': 'Number of coils to read', "mandatory":True, "value": 10},
-                {'name': 'start_address', 'desc': 'Starting address to read from', "mandatory":True, "value": 0}
-            ]},
-            {'name': 'modbus_write_single_coil', 'desc': 'Modbus Write Single Coil Fuzzer', "options": [
-                {'name': 'address', 'desc': 'Address to write to', "mandatory":True, "value": 0},
-                {'name': 'value', 'desc': 'Value to write (0 or 1)', "mandatory":True, "value": 1}
-            ]}
-        ]
-    },
-    {
-        's7comm': [
-            {'name': 'info_device', 'desc': 'S7comm Info Device Module', "options": []}
-        ]
-    },
-    {
-        'profinet': [
-            {'name': 'search_profinet', 'desc': 'Search for Profinet Devices', "options": []}
-        ]
-    }
-    
-]
 
 class SessionPrompt(CommandPrompt):
     """
@@ -58,13 +32,11 @@ class SessionPrompt(CommandPrompt):
         None
     """
     def __init__(self):
-        super().__init__()
         self.prompt = "[  <b>➜</b>   ]"
         self.exit_flag = False
-        self.module = ''
-        self.protocol = ''
         self.target = ''
         self.port = 0
+        super().__init__()
 
     # ================================================================#
     # CommandPrompt Overridden Functions                              #
@@ -79,64 +51,58 @@ class SessionPrompt(CommandPrompt):
         """
         nested_commands = super().get_nested_commands()
         nested_commands.update({})
+        
         return nested_commands
     
     def get_commands(self):
-        """
-        Get the full list of commands.
-        
-        Returns:
-            dict: The commands dictionary.
-        """
 
-        """ Contains the full list of commands"""
-        commands = super().get_commands()
-        commands.update({
-            'options': {
-                'desc': 'Show a list of options of the module selected',
-                'exec': self._cmd_show_options
-            },
-            'search': {
-                'desc': 'Search for a specific module',
-                'exec': self._cmd_search
-            },
-            'modules': {
+        commands = {
+            # Base commands always available
+            'quit': {'desc': 'Exit the program'},
+            'exit': {'desc': 'Exit the program'},
+            'help': {'desc': 'Show all available commands', 'exec': self._cmd_help},
+            'back': {'desc': 'Deselect a protocol or a module', 'exec': self._cmd_back},
+            'search': {'desc': 'Search for a specific module', 'exec': self._cmd_search},
+        }
+        
+        # Root level - no protocol selected
+        if not self.protocol:
+            commands['use-protocol'] = {
+                'desc': 'Use a protocol (Modbus/S7comm/Opcua)', 
+                'exec': self._cmd_use_protocol
+            }
+        
+        # Protocol level - protocol selected but no module
+        if self.protocol:
+            commands['use-module'] = {
+                'desc': 'Select a module to use',
+                'exec': self._cmd_use_module
+            }
+            commands['modules'] = {
                 'desc': 'Show available modules',
                 'exec': self._cmd_modules
-            },
-            'exploit': {
-                'desc': 'Send the packet against the target',
-                'exec': self._cmd_run
-            },
-            "use-protocol": {
-                'desc': 'Use a protocol (Modbus/S7comm/Opcua)',
-                'exec': self._cmd_use_protocol
-            },
-            "use-module": {
-                'desc': 'Use a protocol (Modbus/S7comm/Opcua)',
-                'exec': self._cmd_use_module
-            },
-            'help': {
-                'desc': 'Show all available commands',
-                'exec': self._cmd_help
-            },
-            'back': {
-                'desc': 'Deselect a protocol or a module',
-                'exec': self._cmd_back
-            },
-            'set': {
+            }
+        
+        # Module level - both protocol and module selected
+        if self.protocol and self.module:
+            commands['options'] = {
+                'desc': 'Show a list of options of the module selected',
+                'exec': self._cmd_show_options
+            }
+            commands['set'] = {
                 'desc': 'Set a value to an option of the module',
                 'exec': self._cmd_set
-            },
-            'run': {
+            }
+            commands['run'] = {
                 'desc': 'Run the selected module',
                 'exec': self._cmd_run
-            },
-        })
+            }
+            commands['exploit'] = {
+                'desc': 'Send the packet against the target',
+                'exec': self._cmd_run
+            }
         
-
         return commands
-
     # --------------------------------------------------------------- #
 
     def get_prompt(self):
@@ -157,7 +123,7 @@ class SessionPrompt(CommandPrompt):
         Returns:
             HTML: The toolbar message as an HTML object.
         """
-        toolbar_message = HTML(f'OT PWNSHELL')
+        toolbar_message = HTML(f'ICS PWNSHELL')
 
         return toolbar_message
 
@@ -312,18 +278,18 @@ class SessionPrompt(CommandPrompt):
                 option_found = True
                 print(f"Set {variable} to {value} in module {self.module}")
                 break
-
-
     # --------------------------------------------------------------- #
     def _cmd_back(self, _):
         if self.module:  # Check if a module is selected
-            self.module = ''
+            self.module = None
             self.options = []
             self.prompt = f"[  <b>{self.protocol.upper()}</b> ➜   ]"
             return
         if self.protocol:  # Check if a protocol is selected
-            self.protocol = ''
+            self.protocol = None
             self.prompt = "[  <b>➜</b>   ]"
+            self.commands = self.get_commands()
+            self.update_nested_completer()
             return
         self._print_error("No protocol or module to go back from.")
         
@@ -331,7 +297,7 @@ class SessionPrompt(CommandPrompt):
     # --------------------------------------------------------------- #
 
     def _cmd_show_options(self, _):
-        if self.module == '':
+        if self.module == '' or self.module is None:
             print("\n\n")
             print("No module selected. Use the 'use' command to select a module.")
             return None
@@ -352,7 +318,7 @@ class SessionPrompt(CommandPrompt):
         print("\n\n")
         print("[!] Running the module...")
 
-        if self.module == '':
+        if self.module == '' or self.module is None:
             print("No module selected. Use the 'use' command to select a module.")
         
         if self.module == 'modbus_read_coils':
@@ -384,9 +350,11 @@ class SessionPrompt(CommandPrompt):
         if selected in ['modbus', 'profinet', 's7comm']:
             self.prompt = f"[  <b>{selected.upper()}</b> ➜   ]"
             self.protocol = selected
-            self.module = ''
+            self.module = None
             self.options = []
-            self.update_nested_completer()
+            self.commands = self.get_commands()
+            print(f'DEBUG: Commands set to {self.commands}')
+            self.update_nested_completer()  # Update the nested completer
             return
 
         # If no match is found, print an error
@@ -402,58 +370,17 @@ class SessionPrompt(CommandPrompt):
 
         # Check if the selected token matches a module within the current protocol
         if self.protocol:
-            protocol_modules = None
-            for protocol_dict in modules:
-                if self.protocol in protocol_dict:
-                    protocol_modules = protocol_dict[self.protocol]
-                    break
-
-            if protocol_modules:
-                module_names = [module['name'] for module in protocol_modules]
-                if selected in module_names:
-                    self.module = selected
-                    self.options = next(module['options'] for module in protocol_modules if module['name'] == selected)
-                    self.prompt = f"[  <b>{self.protocol.upper()}</b> ➜  <b>{selected}</b>  ]"
-                    return
+            protocol_modules = next((protocol_dict[self.protocol] for protocol_dict in modules if self.protocol in protocol_dict), [])
+            module_names = [module['name'] for module in protocol_modules]
+            if selected in module_names:
+                self.module = selected
+                self.options = next(module['options'] for module in protocol_modules if module['name'] == selected)
+                self.prompt = f"[  <b>{self.protocol.upper()}</b> ➜  <b>{selected}</b>  ]"
+                self.update_nested_completer()  # Update the nested completer
+                return
 
         # If no match is found, print an error
         self._print_error(f'Module not found in the selected protocol {self.protocol} or protocol not selected')
-        return
-    
-    def _cmd_use(self, tokens):
-        print("\n\n")
-        if len(tokens) == 0:
-            self._print_error('Usage: use [PROTOCOL | MODULE]')
-            return
-
-        selected = tokens[0].lower()
-
-        # Check if the selected token matches a protocol
-        if selected in ['modbus', 'opcua', 's7comm']:
-            self.prompt = f"[  <b>{selected.upper()}</b> ➜   ]"
-            self.protocol = selected
-            self.module = ''
-            self.options = []
-            return
-
-        # Check if the selected token matches a module within the current protocol
-        if self.protocol:
-            protocol_modules = None
-            for protocol_dict in modules:
-                if self.protocol in protocol_dict:
-                    protocol_modules = protocol_dict[self.protocol]
-                    break
-
-            if protocol_modules:
-                module_names = [module['name'] for module in protocol_modules]
-                if selected in module_names:
-                    self.module = selected
-                    self.options = next(module['options'] for module in protocol_modules if module['name'] == selected)
-                    self.prompt = f"[  <b>{self.protocol.upper()}</b> ➜  <b>{selected}</b>  ]"
-                    return
-
-        # If no match is found, print an error
-        self._print_error('Module not found in the selected protocol or protocol not selected')
         return
 
     # --------------------------------------------------------------- #
@@ -469,7 +396,7 @@ class SessionPrompt(CommandPrompt):
             None
         """
         print(
-            "\n OT Pwnshell - Tool to interact with ICS devices\n"+
+            "\n ICS Pwnshell - Tool to interact with industrial devices\n"+
             "   -  set VARIABLE VALUE             Set a value to a varible.\n"+
             "   -  use PROTOCOL | MODULE          Use a protocol (S7comm/Modbus/Opcua) or use module from protocol.\n"+
             "   -  modules                        Show available modules.\n"+
@@ -520,33 +447,38 @@ class SessionPrompt(CommandPrompt):
         Returns:
             None
         """
-        print_formatted_text(HTML('<b>OT pwnshell</b>:'))
+        print_formatted_text(HTML('<b>ICS pwnshell</b>:'))
     def update_nested_completer(self):
         """
         Dynamically update the NestedCompleter based on the current protocol and module.
-
-        Returns:
-            None
         """
+        # Start with ALL current commands (this is the key!)
         nested_commands = {}
-
-        # Add protocol-specific commands
+        
+        # Add all base commands first
+        for cmd_name in self.commands.keys():
+            nested_commands[cmd_name] = None  # Default to no subcommands
+        
+        # Now add protocol-specific nested commands
         if self.protocol:
-            protocol_modules = next((protocol_dict[self.protocol] for protocol_dict in modules if self.protocol in protocol_dict), [])
+            # Find the modules for the selected protocol
+            protocol_modules = next((protocol_dict[self.protocol] for protocol_dict in modules 
+                                    if self.protocol in protocol_dict), [])
             module_names = [module['name'] for module in protocol_modules]
             nested_commands['use-module'] = {name: None for name in module_names}
-
+        
         # Add module-specific options
         if self.module:
-            module_options = next((module['options'] for protocol_dict in modules if self.protocol in protocol_dict
-                                for module in protocol_dict[self.protocol] if module['name'] == self.module), [])
+            # Find the options for the selected module
+            module_options = next((module['options'] for protocol_dict in modules 
+                                if self.protocol in protocol_dict
+                                for module in protocol_dict[self.protocol] 
+                                if module['name'] == self.module), [])
             option_names = [option['name'] for option in module_options]
             nested_commands['set'] = {name: None for name in option_names}
-
-        # Update the completer
+        
+        # Update the completer with the COMPLETE command set
         self.update_nested_commands(nested_commands)
-    # --------------------------------------------------------------- #
-
     def exit_message(self):
         """
         Print the exit message when the prompt ends.

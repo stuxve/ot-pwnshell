@@ -42,7 +42,7 @@ def main():
 
     session = SessionPrompt()
     print("\nWrite 'help' to get all the info commands availables\n")
-    print_formatted_text(HTML('Welcome to the <b>OT Pwnshell</b>'))
+    print_formatted_text(HTML('Welcome to the <b>ICS Pwnshell</b>'))
 
     session.start_prompt()
 
