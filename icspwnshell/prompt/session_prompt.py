@@ -349,6 +349,8 @@ class SessionPrompt(CommandPrompt):
                 print(f"{'-' * 20} {'-' * 15} {'-' * 50}")
 
                 print("\n\n")
+            else:
+                print(f"The module {self.module} have no options. Just run it!")
             return None
 
     # --------------------------------------------------------------- #
