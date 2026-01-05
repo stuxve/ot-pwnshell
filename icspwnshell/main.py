@@ -2,9 +2,9 @@ import os
 import time
 from .prompt.session_prompt import SessionPrompt
 from prompt_toolkit import HTML, print_formatted_text
-
+import random
 # Define the octopus arm ASCII art
-arm = [r"""
+arm1 = [r"""
  _____ _____  _____ 
 |_   _/  __ \/  ___|  
   | | | /  \/\ `--.    
@@ -21,9 +21,31 @@ ______ _    _ _   _  _____ _   _  _____ _      _
 By @stuxve
 """]
 
-    
+arm2 = [r"""
+                    .-')                                                          
+                   ( OO ).                                                        
+  ,-.-')   .-----.(_)---\_)                                                       
+  |  |OO) '  .--.//    _ |                                                        
+  |  |  \ |  |('-.\  :` `.                                                        
+  |  |(_//_) |OO  )'..`''.)                                                       
+ ,|  |_.'||  |`-'|.-._)   \                                                       
+(_|  |  (_'  '--'\\       /                                                       
+  `--'     `-----' `-----'                                                        
+   _ (`-.   (`\ .-') /`     .-') _   .-')    ('-. .-.   ('-.                      
+  ( (OO  )   `.( OO ),'    ( OO ) ) ( OO ). ( OO )  / _(  OO)                     
+ _.`     \,--./  .--.  ,--./ ,--,' (_)---\_),--. ,--.(,------.,--.      ,--.      
+(__...--''|      |  |  |   \ |  |\ /    _ | |  | |  | |  .---'|  |.-')  |  |.-')  
+ |  /  | ||  |   |  |, |    \|  | )\  :` `. |   .|  | |  |    |  | OO ) |  | OO ) 
+ |  |_.' ||  |.'.|  |_)|  .     |/  '..`''.)|       |(|  '--. |  |`-' | |  |`-' | 
+ |  .___.'|         |  |  |\    |  .-._)   \|  .-.  | |  .--'(|  '---.'(|  '---.' 
+ |  |     |   ,'.   |  |  | \   |  \       /|  | |  | |  `---.|      |  |      |  
+ `--'     '--'   '--'  `--'  `--'   `-----' `--' `--' `------'`------'  `------'
 
+By @stuxve
+"""]
+arm_ar = [arm1, arm2]
 
+arm = random.choice(arm_ar)
 # Define a function to print the arm movement
 def print_arm_movement(arm):
     for i in range(len(arm)):
