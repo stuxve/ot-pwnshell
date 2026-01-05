@@ -120,12 +120,13 @@ def print_intros(num):
 def main():
     print_intros(4)
     print_arm_movement(arm)
+    print_intros(2)
     time.sleep(1.5)
+    print_intros(20)
 
     session = SessionPrompt()
     print("\nWrite 'help' to get all the info commands availables\n")
     print_formatted_text(HTML('Welcome to the <b>ICS Pwnshell</b>'))
-
     session.start_prompt()
 
 
