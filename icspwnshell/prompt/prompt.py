@@ -84,8 +84,18 @@ class CommandPrompt(object):
         Returns:
             dict: A dictionary containing the available commands.
         """
+        
         return COMMANDS
     
+    def get_self_commands(self):
+        """
+        Retrieve the commands of the current instance.
+        
+        Returns:
+            dict: A dictionary containing the commands of the current instance.
+        """
+        return self.commands
+
     def get_nested_commands(self):
         """
         Retrieve the available nested commands.
@@ -95,7 +105,7 @@ class CommandPrompt(object):
         """
         return NESTED_COMMANDS
     
-    def update_nested_commands(self, commands):
+    def update_nested_commands(self, commands, protocol):
         """
         Update the commands with the given commands dictionary.
         
@@ -103,13 +113,9 @@ class CommandPrompt(object):
             commands (dict): A dictionary containing the commands to be added.
         """
         # REPLACE instead of UPDATE - this is the critical fix!
-        self.nested_commands = commands.copy()  # Or just: self.nested_commands = commands
-        
-        #self.commands = self.get_commands()
-        self.completer = merge_completers([
-            CommandCompleter(self.commands), 
-            NestedCompleter.from_nested_dict(self.nested_commands)
-        ], deduplicate=True)
+        #self.nested_commands = commands.copy()  # Or just: self.nested_commands = commands
+        self.nested_commands.update(commands)
+        self.completer = merge_completers([CommandCompleter(self.commands), NestedCompleter.from_nested_dict(self.nested_commands)], deduplicate = True)
         self.prompt_session.completer = self.completer
 
     def set_completer(self, completer):
@@ -119,7 +125,10 @@ class CommandPrompt(object):
         Args:
             completer (Completer): The command completer to be set.
         """
+        self.completer = completer
         self.prompt_session.completer = completer
+
+        #print(f"DEBUG: Completer updated with commands: {list(self.commands.keys())}")  # Debug print
     # --------------------------------------------------------------- #
 
     def get_prompt(self):
@@ -217,6 +226,7 @@ class CommandPrompt(object):
         Returns:
             None
         """
+        self.commands = self.get_commands()
         if len(tokens) > 0:
             self.cmd_handler.handle_command(tokens)
 
