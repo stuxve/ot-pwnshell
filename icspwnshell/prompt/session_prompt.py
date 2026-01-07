@@ -549,8 +549,71 @@ class SessionPrompt(CommandPrompt):
         mb_cl = Modbus(self.target, self.port)
         mb_cl.read_coils()
     
-    def 
+    def read_holding_registers(self):
+        print("Reading holding registers from Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        mb_cl.read_holding_register()
+
+    def write_single_register(self):
+        print("Writing single register to Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        mb_cl.write_single_register()
+
+    def write_coil(self):
+        print("Writing coil to Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        mb_cl.write_coil()
     
+    def write_multiple_registers(self):
+        print("Writing multiple registers to Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        mb_cl.write_multiple_registers()
+    
+    def write_multiple_coils(self):
+        print("Writing multiple coils to Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        mb_cl.write_multiple_coils()
+    
+    def read_discrete_input(self):
+        print("Reading discrete inputs from Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        mb_cl.read_discrete_input()
+
+    def read_input_registers(self):
+        print("Reading input registers from Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        mb_cl.read_input_registers()
+
+    def masked_write_register(self):
+        print("Performing masked write register on Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        mb_cl.mask_write_register()
+
+    def read_write_multiple_registers(self):
+        print("Performing read/write multiple registers on Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        mb_cl.read_write_multiple_registers()
+
+    def read_fifo_queue(self):
+        print("Reading FIFO queue from Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        mb_cl.read_fifo_queue()
+
+    def read_multiple_registers(self):
+        print("Reading multiple registers from Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        mb_cl.read_multiple_registers()
 
     def client_s7_connection(self):
         print("Establishing S7comm client connection...")

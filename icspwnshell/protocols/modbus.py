@@ -114,7 +114,7 @@ class Modbus():
             print("Error in the response")
             return None
     
-    def read_input_register(self, target, port, count, start_address, timeout=5):
+    def read_input_registers(self, target, port, count, start_address, timeout=5):
         self.init_connection(target, port, timeout)
         
         request = ModbusHeaderRequest(func_code=0x04) / ReadInputRegistersRequest(
@@ -213,14 +213,15 @@ class Modbus():
             print("Error in the response")
             return None
     
-    def read_write_multiple_registers(self, target, port, read_start, read_count, 
-                                     write_start, write_values, timeout=5):
+  
+  
+    def read_multiple_registers(self, target, port, read_start_address, read_count, write_start_address, write_values, timeout=5):
         self.init_connection(target, port, timeout)
         
         request = ModbusHeaderRequest(func_code=0x17) / ReadWriteMultipleRegistersRequest(
-            ReadReferenceNumber=read_start,
+            ReadReferenceNumber=read_start_address,
             ReadWordCount=read_count,
-            WriteReferenceNumber=write_start,
+            WriteReferenceNumber=write_start_address,
             WriteWordCount=len(write_values),
             WriteRegisterValues=write_values
         )
@@ -230,52 +231,13 @@ class Modbus():
         parsed_response = ModbusHeaderResponse(response)
         
         if parsed_response.func_code == 0x17:
-            registers = parsed_response.payload.RegisterValue
-            print(f"Read/Write operation successful. Read registers: {registers}")
-            return registers
+            read_registers = parsed_response.payload.ReadRegisterValues
+            print(f"Read/Write Multiple Registers - Read Values: {read_registers}")
+            return read_registers
         else:
             print("Error in the response")
             return None
     
-    def read_file_record(self, target, port, file_number, record_number, record_length, timeout=5):
-        self.init_connection(target, port, timeout)
-        
-        request = ModbusHeaderRequest(func_code=0x14) / ReadFileRecordRequest(
-            FileNumber=file_number,
-            RecordNumber=record_number,
-            RecordLength=record_length
-        )
-        
-        self.send_packet(request)
-        response = self.receive_packet()
-        parsed_response = ModbusHeaderResponse(response)
-        
-        if parsed_response.func_code == 0x14:
-            print("Read file record successful")
-            return parsed_response
-        else:
-            print("Error in the response")
-            return None
-    
-    def write_file_record(self, target, port, file_number, record_number, record_data, timeout=5):
-        self.init_connection(target, port, timeout)
-        
-        request = ModbusHeaderRequest(func_code=0x15) / WriteFileRecordRequest(
-            FileNumber=file_number,
-            RecordNumber=record_number,
-            RecordData=record_data
-        )
-        
-        self.send_packet(request)
-        response = self.receive_packet()
-        parsed_response = ModbusHeaderResponse(response)
-        
-        if parsed_response.func_code == 0x15:
-            print("Write file record successful")
-            return parsed_response
-        else:
-            print("Error in the response")
-            return None
     
     def read_fifo_queue(self, target, port, fifo_pointer_address, timeout=5):
         self.init_connection(target, port, timeout)
