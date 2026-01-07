@@ -35,7 +35,7 @@ class SessionPrompt(CommandPrompt):
     def __init__(self):
         self.prompt = "[  <b>➜</b>   ]"
         self.exit_flag = False
-        self.target = ''
+        self.target = '127.0.0.1'
         self.port = 0
         super().__init__()
 
@@ -238,6 +238,8 @@ class SessionPrompt(CommandPrompt):
         # Print the available modules for the selected protocol
         for mod in protocol_modules:
             print(f" - {mod['name']}: {mod['desc']}")
+        print("\n\n")
+
         return None
 
     def _cmd_search(self, tokens):
@@ -263,15 +265,17 @@ class SessionPrompt(CommandPrompt):
         variable = ''.join(tokens[0])
         value = ' '.join(tokens[1:])
         
-        if variable.lower() == 'target':
+        if variable.lower() == 'rhost':
             if not self.is_valid_ip(value):
                 self._print_error('Invalid IP address')
                 return
             else:
+                print(f"[!] Set rhost to {value}\n")
                 self.target = value
-        if tokens.lower() == 'port':
+        if value.lower() == 'rport':
             if value < 0 or value > 65535:
                 self.port = value
+                print(f"[!] Set rport to {value}\n")
 
         # Check if a module is selected
         if self.module == '':
@@ -283,7 +287,7 @@ class SessionPrompt(CommandPrompt):
             if option['name'].lower() == variable.lower():
                 option['value'] = value
                 option_found = True
-                print(f"Set {variable} to {value} in module {self.module}")
+                print(f"[!] Set {variable} to {value} in module {self.module}\n")
                 break
     # --------------------------------------------------------------- #
     def _cmd_back(self, _):
@@ -339,8 +343,8 @@ class SessionPrompt(CommandPrompt):
                 print(f"Options for module {self.module}:")
                 print(f"{'Option Name':<20} {'Value':<15} {'Description':<50}")
                 print(f"{'-' * 20} {'-' * 15} {'-' * 50}")
-                print(f"{'LHost':<20} {self.target:<15} {'Target IP address':<50}")
-                print(f"{'LPort':<20} {self.port:<15} {'Target port':<50}")
+                print(f"{'rhost':<20} {self.target:<15} {'Target IP address':<50}")
+                print(f"{'rport':<20} {self.port:<15} {'Target port':<50}")
 
                 print(f"{'-' * 20} {'-' * 15} {'-' * 50}")
 
@@ -392,6 +396,12 @@ class SessionPrompt(CommandPrompt):
         if selected in ['modbus', 'profinet', 's7comm']:
             self.prompt = f"[  <b>{selected.upper()}</b> ➜   ]"
             self.protocol = selected
+            if selected == 'modbus':
+                self.port = 502
+            if selected == 's7comm':
+                self.port = 102
+            if selected == 'profinet':
+                self.port = 34964
             self.module = None
             self.options = []
             #self.commands = self.get_commands()
@@ -419,7 +429,7 @@ class SessionPrompt(CommandPrompt):
                 self.module = selected
                 self.options = next(module['options'] for module in protocol_modules if module['name'] == selected)
                 self.prompt = f"[  <b>{self.protocol.upper()}</b> ➜  <b>{selected}</b>  ]"
-                #self.update_nested_completer()  # Update the nested completer
+                self.update_nested_completer()  # Update the nested completer
                 return
 
         # If no match is found, print an error
@@ -509,6 +519,7 @@ class SessionPrompt(CommandPrompt):
                                     if self.protocol in protocol_dict), [])
             module_names = [module['name'] for module in protocol_modules]
             nested_commands['use-module'] = {name: None for name in module_names}
+            
 
         # Add module-specific options
         if self.module:
@@ -519,6 +530,11 @@ class SessionPrompt(CommandPrompt):
                                 if module['name'] == self.module), [])
             option_names = [option['name'] for option in module_options]
             nested_commands['set'] = {name: None for name in option_names}
+            nested_commands['set']['rhost'] = None
+            nested_commands['set']['rport'] = None
+
+
+            
         
         # Update the completer with the COMPLETE command set
         self.update_nested_commands(nested_commands, self.protocol)
@@ -536,6 +552,12 @@ class SessionPrompt(CommandPrompt):
     # --------------------------------------------------------------- #
     # Functions of the modules                                        #
     # --------------------------------------------------------------- #
+    def parse_start_address(value):
+        addr = int(value, 16) if isinstance(value, str) and value.lower().startswith("0x") else int(value)
+        if addr < 0 or addr > 0xFFFF:
+            raise ValueError("start_address out of Modbus range")
+        return addr
+
     def read_coils(self):
         """
         Function to read coils from a Modbus device.
@@ -555,9 +577,9 @@ class SessionPrompt(CommandPrompt):
         )
         count_value = next(o["value"] for o in options if o["name"] == "count")
         start_address_value = next(o["value"] for o in options if o["name"] == "start_address")
-
+        start_address_value = self.parse_start_address(start_address_value)
         data = mb_cl.read_coils(self.target, self.port, count_value, start_address_value, timeout=5)
-        
+
         print(f"Coils data: {data}") 
     
     def read_holding_registers(self):
