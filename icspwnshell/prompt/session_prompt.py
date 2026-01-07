@@ -536,7 +536,6 @@ class SessionPrompt(CommandPrompt):
     # --------------------------------------------------------------- #
     # Functions of the modules                                        #
     # --------------------------------------------------------------- #
-
     def read_coils(self):
         """
         Function to read coils from a Modbus device.
@@ -547,13 +546,34 @@ class SessionPrompt(CommandPrompt):
         print("Reading coils from Modbus device...")
         
         mb_cl = Modbus(self.target, self.port)
-        mb_cl.read_coils()
+        options = next(
+        module["options"]
+        for protocol_dict in modules
+        if self.protocol in protocol_dict
+        for module in protocol_dict[self.protocol]
+        if module["name"] == self.protocol
+        )
+        count_value = next(o["value"] for o in options if o["name"] == "count")
+        start_address_value = next(o["value"] for o in options if o["name"] == "start_address")
+
+        data = mb_cl.read_coils(self.target, self.port, count_value, start_address_value, timeout=5)
+        
+        print(f"Coils data: {data}") 
     
     def read_holding_registers(self):
         print("Reading holding registers from Modbus device...")
         
         mb_cl = Modbus(self.target, self.port)
-        mb_cl.read_holding_register()
+        options = next(
+        module["options"]
+        for protocol_dict in modules
+        if self.protocol in protocol_dict
+        for module in protocol_dict[self.protocol]
+        if module["name"] == self.protocol
+        )
+        count_value = next(o["value"] for o in options if o["name"] == "count")
+        start_address_value = next(o["value"] for o in options if o["name"] == "start_address")
+        mb_cl.read_holding_register(self.target, self.port, count_value, start_address_value, timeout=5)
 
     def write_single_register(self):
         print("Writing single register to Modbus device...")

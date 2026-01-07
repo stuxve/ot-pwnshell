@@ -50,6 +50,7 @@ class Modbus():
         if parsed_response.func_code == 0x01:
             coils_status = parsed_response.payload.CoilsStatus
             print(f"Coils Status: {coils_status}")
+            self.close_connection()
             return coils_status
         else:
             print("Error in the response")
