@@ -537,7 +537,7 @@ class SessionPrompt(CommandPrompt):
     # Functions of the modules                                        #
     # --------------------------------------------------------------- #
 
-    def modbus_read_coils(self):
+    def read_coils(self):
         """
         Function to read coils from a Modbus device.
         
@@ -548,6 +548,8 @@ class SessionPrompt(CommandPrompt):
         
         mb_cl = Modbus(self.target, self.port)
         mb_cl.read_coils()
+    
+    def 
     
 
     def client_s7_connection(self):

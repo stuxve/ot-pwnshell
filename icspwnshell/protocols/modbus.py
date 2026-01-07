@@ -1,19 +1,17 @@
-from .modbus_structure import *
+from .modbus_structure import (
+    ModbusHeaderRequest, ModbusHeaderResponse,
+    ReadCoilsRequest, ReadDiscreteInputsRequest,
+    ReadHoldingRegistersRequest, ReadInputRegistersRequest,
+    WriteSingleCoilRequest, WriteSingleRegisterRequest,
+    WriteMultipleCoilsRequest, WriteMultipleRegistersRequest,
+    MaskWriteRegisterRequest, ReadWriteMultipleRegistersRequest,
+    ReadFileRecordRequest, WriteFileRecordRequest, ReadFIFOQueueRequest
+)
 import socket
 
 class Modbus():
-    def __init__ (self, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        #self.unit_id = 1
-        #self.transaction_id = 1
-       # self.protocol_id = 0
-        #self.function_code = 0
-        #self.error = None
-        #self.error_code = None
-        #self.error_message = None
-        #self.exception_code = None
-        #self.exception_message = None
-        #self.response = None
         self.pdu = None
         self.data = None
         self.length = 0
@@ -21,47 +19,34 @@ class Modbus():
         self.connection = None
         self.target = None
         self.port = None
-        #self.error = None
-        #self.error_code = None
-        #self.error_message = None
-        #self.exception_code = None
-        #self.exception_message = None
-        #self.data = None
-    
+        self.timeout = 5
 
     def close_connection(self):
-        # Close the connection
         if self.connection:
             self.connection.close()
             self.connection = None
 
     def init_connection(self, target, port, timeout=5):
-        # Initialize connection (e.g., TCP socket)
         if self.connection is None:
+            self.target = target
+            self.port = port
+            self.timeout = timeout
             self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.connection.settimeout(self.timeout)
             self.connection.connect((self.target, self.port))
 
     def read_coils(self, target, port, count, start_address, timeout=5):
-        # Initialize the connection with the given target and port
         self.init_connection(target, port, timeout)
-
-        # Create the request packet using the provided start_address and count
+        
         request = ModbusHeaderRequest(func_code=0x01) / ReadCoilsRequest(
             ReferenceNumber=start_address,
             BitCount=count
         )
-
-        # Send the request packet
+        
         self.send_packet(request)
-
-        # Receive the response packet
         response = self.receive_packet()
-
-        # Parse the response packet
         parsed_response = ModbusHeaderResponse(response)
-
-        # Process the response
+        
         if parsed_response.func_code == 0x01:
             coils_status = parsed_response.payload.CoilsStatus
             print(f"Coils Status: {coils_status}")
@@ -70,169 +55,261 @@ class Modbus():
             print("Error in the response")
             return None
     
-    def write_coil(self):
-        self.function_code = 0x05
-        self.pdu = WriteSingleCoilRequest()
-        self.data = self.pdu
-        self.length = len(self.data)
-        self.adu = ModbusHeaderRequest
+    def write_coil(self, target, port, address, value, timeout=5):
+        self.init_connection(target, port, timeout)
+        
+        request = ModbusHeaderRequest(func_code=0x05) / WriteSingleCoilRequest(
+            ReferenceNumber=address,
+            Value=value
+        )
+        
+        self.send_packet(request)
+        response = self.receive_packet()
+        parsed_response = ModbusHeaderResponse(response)
+        
+        if parsed_response.func_code == 0x05:
+            print(f"Write coil successful at address {address}")
+            return parsed_response
+        else:
+            print("Error in the response")
+            return None
 
-        # Send packet
-        self.send_packet()
-        self.receive_packet()
-        self.parse_packet()
+    def read_discrete_input(self, target, port, count, start_address, timeout=5):
+        self.init_connection(target, port, timeout)
+        
+        request = ModbusHeaderRequest(func_code=0x02) / ReadDiscreteInputsRequest(
+            ReferenceNumber=start_address,
+            BitCount=count
+        )
+        
+        self.send_packet(request)
+        response = self.receive_packet()
+        parsed_response = ModbusHeaderResponse(response)
+        
+        if parsed_response.func_code == 0x02:
+            inputs_status = parsed_response.payload.InputStatus
+            print(f"Discrete Inputs Status: {inputs_status}")
+            return inputs_status
+        else:
+            print("Error in the response")
+            return None
     
-
-    def read_discrete_input(self):
-        self.function_code = 0x02
-        self.pdu = ReadDiscreteInputsRequest()
-        self.data = self.pdu
-        self.length = len(self.data)
-        self.adu = ModbusHeaderRequest
-
-        # Send packet
-        self.send_packet()
-        self.receive_packet()
-        self.parse_packet()
+    def read_holding_register(self, target, port, count, start_address, timeout=5):
+        self.init_connection(target, port, timeout)
+        
+        request = ModbusHeaderRequest(func_code=0x03) / ReadHoldingRegistersRequest(
+            ReferenceNumber=start_address,
+            WordCount=count
+        )
+        
+        self.send_packet(request)
+        response = self.receive_packet()
+        parsed_response = ModbusHeaderResponse(response)
+        
+        if parsed_response.func_code == 0x03:
+            registers = parsed_response.payload.RegisterValue
+            print(f"Holding Registers: {registers}")
+            return registers
+        else:
+            print("Error in the response")
+            return None
     
-    def read_holding_register(self):
-        self.function_code = 0x03
-        self.pdu = ReadHoldingRegistersRequest()
-        self.data = self.pdu
-        self.length = len(self.data)
-        self.adu = ModbusHeaderRequest
-
-        # Send packet
-        self.send_packet()
-        self.receive_packet()
-        self.parse_packet()
+    def read_input_register(self, target, port, count, start_address, timeout=5):
+        self.init_connection(target, port, timeout)
+        
+        request = ModbusHeaderRequest(func_code=0x04) / ReadInputRegistersRequest(
+            ReferenceNumber=start_address,
+            WordCount=count
+        )
+        
+        self.send_packet(request)
+        response = self.receive_packet()
+        parsed_response = ModbusHeaderResponse(response)
+        
+        if parsed_response.func_code == 0x04:
+            registers = parsed_response.payload.RegisterValue
+            print(f"Input Registers: {registers}")
+            return registers
+        else:
+            print("Error in the response")
+            return None
     
-    def read_input_register(self):
-        self.function_code = 0x04
-        self.pdu = ReadInputRegistersRequest()
-        self.data = self.pdu
-        self.length = len(self.data)
-        self.adu = ModbusHeaderRequest
-
-        # Send packet
-        self.send_packet()
-        self.receive_packet()
-        self.parse_packet()
+    def write_single_register(self, target, port, address, value, timeout=5):
+        self.init_connection(target, port, timeout)
+        
+        request = ModbusHeaderRequest(func_code=0x06) / WriteSingleRegisterRequest(
+            ReferenceNumber=address,
+            Value=value
+        )
+        
+        self.send_packet(request)
+        response = self.receive_packet()
+        parsed_response = ModbusHeaderResponse(response)
+        
+        if parsed_response.func_code == 0x06:
+            print(f"Write register successful at address {address}")
+            return parsed_response
+        else:
+            print("Error in the response")
+            return None
     
-    def write_single_register(self):
-        self.function_code = 0x06
-        self.pdu = WriteSingleRegisterRequest()
-        self.data = self.pdu
-        self.length = len(self.data)
-        self.adu = ModbusHeaderRequest
-
-        # Send packet
-        self.send_packet()
-        self.receive_packet()
-        self.parse_packet()
+    def write_multiple_coils(self, target, port, start_address, values, timeout=5):
+        self.init_connection(target, port, timeout)
+        
+        request = ModbusHeaderRequest(func_code=0x0F) / WriteMultipleCoilsRequest(
+            ReferenceNumber=start_address,
+            BitCount=len(values),
+            CoilValues=values
+        )
+        
+        self.send_packet(request)
+        response = self.receive_packet()
+        parsed_response = ModbusHeaderResponse(response)
+        
+        if parsed_response.func_code == 0x0F:
+            print(f"Write multiple coils successful starting at {start_address}")
+            return parsed_response
+        else:
+            print("Error in the response")
+            return None
     
-    def write_multiple_coils(self):
-        self.function_code = 0x0F
-        self.pdu = WriteMultipleCoilsRequest()
-        self.data = self.pdu
-        self.length = len(self.data)
-        self.adu = ModbusHeaderRequest
-
-        # Send packet
-        self.send_packet()
-        self.receive_packet()
-        self.parse_packet()
+    def write_multiple_registers(self, target, port, start_address, values, timeout=5):
+        self.init_connection(target, port, timeout)
+        
+        request = ModbusHeaderRequest(func_code=0x10) / WriteMultipleRegistersRequest(
+            ReferenceNumber=start_address,
+            WordCount=len(values),
+            RegisterValues=values
+        )
+        
+        self.send_packet(request)
+        response = self.receive_packet()
+        parsed_response = ModbusHeaderResponse(response)
+        
+        if parsed_response.func_code == 0x10:
+            print(f"Write multiple registers successful starting at {start_address}")
+            return parsed_response
+        else:
+            print("Error in the response")
+            return None
     
-    def write_multiple_registers(self):
-        self.function_code = 0x10
-        self.pdu = WriteMultipleRegistersRequest()
-        self.data = self.pdu
-        self.length = len(self.data)
-        self.adu = ModbusHeaderRequest
-
-        # Send packet
-        self.send_packet()
-        self.receive_packet()
-        self.parse_packet()
+    def mask_write_register(self, target, port, address, and_mask, or_mask, timeout=5):
+        self.init_connection(target, port, timeout)
+        
+        request = ModbusHeaderRequest(func_code=0x16) / MaskWriteRegisterRequest(
+            ReferenceNumber=address,
+            AndMask=and_mask,
+            OrMask=or_mask
+        )
+        
+        self.send_packet(request)
+        response = self.receive_packet()
+        parsed_response = ModbusHeaderResponse(response)
+        
+        if parsed_response.func_code == 0x16:
+            print(f"Mask write register successful at address {address}")
+            return parsed_response
+        else:
+            print("Error in the response")
+            return None
     
-    def mask_write_register(self):
-        self.function_code = 0x16
-        self.pdu = MaskWriteRegisterRequest()
-        self.data = self.pdu
-        self.length = len(self.data)
-        self.adu = ModbusHeaderRequest
-
-        # Send packet
-        self.send_packet()
-        self.receive_packet()
-        self.parse_packet()
+    def read_write_multiple_registers(self, target, port, read_start, read_count, 
+                                     write_start, write_values, timeout=5):
+        self.init_connection(target, port, timeout)
+        
+        request = ModbusHeaderRequest(func_code=0x17) / ReadWriteMultipleRegistersRequest(
+            ReadReferenceNumber=read_start,
+            ReadWordCount=read_count,
+            WriteReferenceNumber=write_start,
+            WriteWordCount=len(write_values),
+            WriteRegisterValues=write_values
+        )
+        
+        self.send_packet(request)
+        response = self.receive_packet()
+        parsed_response = ModbusHeaderResponse(response)
+        
+        if parsed_response.func_code == 0x17:
+            registers = parsed_response.payload.RegisterValue
+            print(f"Read/Write operation successful. Read registers: {registers}")
+            return registers
+        else:
+            print("Error in the response")
+            return None
     
-    def read_write_multiple_registers(self):
-        self.function_code = 0x17
-        self.pdu = ReadWriteMultipleRegistersRequest()
-        self.data = self.pdu
-        self.length = len(self.data)
-        self.adu = ModbusHeaderRequest
-
-        # Send packet
-        self.send_packet()
-        self.receive_packet()
-        self.parse_packet()
+    def read_file_record(self, target, port, file_number, record_number, record_length, timeout=5):
+        self.init_connection(target, port, timeout)
+        
+        request = ModbusHeaderRequest(func_code=0x14) / ReadFileRecordRequest(
+            FileNumber=file_number,
+            RecordNumber=record_number,
+            RecordLength=record_length
+        )
+        
+        self.send_packet(request)
+        response = self.receive_packet()
+        parsed_response = ModbusHeaderResponse(response)
+        
+        if parsed_response.func_code == 0x14:
+            print("Read file record successful")
+            return parsed_response
+        else:
+            print("Error in the response")
+            return None
     
-    def read_file_record(self):
-        self.function_code = 0x14
-        self.pdu = ReadFileRecordRequest()
-        self.data = self.pdu
-        self.length = len(self.data)
-        self.adu = ModbusHeaderRequest
-
-        # Send packet
-        self.send_packet()
-        self.receive_packet()
-        self.parse_packet()
+    def write_file_record(self, target, port, file_number, record_number, record_data, timeout=5):
+        self.init_connection(target, port, timeout)
+        
+        request = ModbusHeaderRequest(func_code=0x15) / WriteFileRecordRequest(
+            FileNumber=file_number,
+            RecordNumber=record_number,
+            RecordData=record_data
+        )
+        
+        self.send_packet(request)
+        response = self.receive_packet()
+        parsed_response = ModbusHeaderResponse(response)
+        
+        if parsed_response.func_code == 0x15:
+            print("Write file record successful")
+            return parsed_response
+        else:
+            print("Error in the response")
+            return None
     
-    def write_file_record(self):
-        self.function_code = 0x15
-        self.pdu = WriteFileRecordRequest()
-        self.data = self.pdu
-        self.length = len(self.data)
-        self.adu = ModbusHeaderRequest
-
-        # Send packet
-        self.send_packet()
-        self.receive_packet()
-        self.parse_packet()
-    
-    def read_fifo_queue(self):
-        self.function_code = 0x18
-        self.pdu = ReadFIFOQueueRequest()
-        self.data = self.pdu
-        self.length = len(self.data)
-        self.adu = ModbusHeaderRequest
-
-        # Send packet
-        self.send_packet()
-        self.receive_packet()
-        self.parse_packet()
+    def read_fifo_queue(self, target, port, fifo_pointer_address, timeout=5):
+        self.init_connection(target, port, timeout)
+        
+        request = ModbusHeaderRequest(func_code=0x18) / ReadFIFOQueueRequest(
+            FIFOPointerAddress=fifo_pointer_address
+        )
+        
+        self.send_packet(request)
+        response = self.receive_packet()
+        parsed_response = ModbusHeaderResponse(response)
+        
+        if parsed_response.func_code == 0x18:
+            fifo_values = parsed_response.payload.FIFOValue
+            print(f"FIFO Queue: {fifo_values}")
+            return fifo_values
+        else:
+            print("Error in the response")
+            return None
     
     def send_packet(self, packet):
-        # Convertir el paquete a bytes y enviarlo
         self.connection.send(bytes(packet))
 
     def receive_packet(self):
-        # Recibir la respuesta del servidor
-        response = self.connection.recv()
+        response = self.connection.recv(1024)
         return response
     
-def parse_packet(raw_packet):
-    # Intentar analizar como ModbusHeaderRequest
-    try:
-        packet = ModbusHeaderRequest(raw_packet)
-        payload_class = packet.guess_payload_class(raw_packet[7:])
-        if payload_class:
-            packet = packet / payload_class(raw_packet[7:])
-        return packet
-    except Exception:
-        print("Error al analizar el paquete, paquete")
-
-    return None
+    def parse_packet(self, raw_packet):
+        try:
+            packet = ModbusHeaderRequest(raw_packet)
+            payload_class = packet.guess_payload_class(raw_packet[7:])
+            if payload_class:
+                packet = packet / payload_class(raw_packet[7:])
+            return packet
+        except Exception as e:
+            print(f"Error parsing packet: {e}")
+            return None
