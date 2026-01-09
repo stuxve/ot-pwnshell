@@ -39,7 +39,8 @@ MODULES = [
 
     {
         's7comm': [
-            {'name': 'info_device', 'desc': 'S7comm Info Device Module', "options": []}
+            {'name': 'info_device', 'desc': 'S7comm Info Device Module', "options": []},
+            {'name': 'flash_led', 'desc': 'S7comm Blink LED Module', "options": []}
         ]
     },
     {

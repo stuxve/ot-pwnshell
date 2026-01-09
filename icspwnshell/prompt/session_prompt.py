@@ -746,6 +746,7 @@ class SessionPrompt(CommandPrompt):
         return None
     # --------------------------------------------------------------- #
     def flashing_led(self):
+        #### To Test ####
         s7_cl = S7Client()
         print("Flashing LED on S7comm device...")
         interfaces = s7_cl.getAllInterfaces()
@@ -765,11 +766,18 @@ class SessionPrompt(CommandPrompt):
 
         if os.name == 'nt': npfdevice = '\Device\NPF_' + winguid
 
-        
 
         dmac = s7_cl.getMac("192.168.1.14", "eth6")
         device={}
         device['name_of_station'] = ''
         device['mac_address'] = dmac
         s7_cl.flashLED(npfdevice, device, macaddr, 3)
+        return None
+    
+    # ================================================================#
+    def s7_info_device(self):
+        #### To Test ####
+        s7_cl = S7Client()
+        print("Getting info from S7comm device...")
+        #s7_cl.get_device_info(self.target, self.port)
         return None
