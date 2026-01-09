@@ -4,6 +4,7 @@ import sys, time
 import threading
 from typing import TYPE_CHECKING
 from icspwnshell.prompt.commands.completer import CommandCompleter
+from icspwnshell.protocols.s7_client import S7Client
 from prompt_toolkit import HTML, print_formatted_text
 from prompt_toolkit.styles import Style, merge_styles
 from prompt_toolkit.shortcuts import prompt
@@ -742,4 +743,33 @@ class SessionPrompt(CommandPrompt):
                 p['subnet_mask'],
                 p['standard_gateway']
             ))
+        return None
+    # --------------------------------------------------------------- #
+    def flashing_led(self):
+        s7_cl = S7Client()
+        print("Flashing LED on S7comm device...")
+        interfaces = s7_cl.getAllInterfaces()
+        #mac_address = s7_cl.get_if_hwaddr('eth6')
+        mac_address = ''
+        npfdevice = None
+        macaddr = None
+        winguid = None
+        for i in interfaces:
+            if i[2] == mac_address:
+                npfdevice = i[0]
+                macaddr = i[2].replace(':', '') # eg: 'ab58e0ff585a'
+                winguid = i[4]
+
+        if not npfdevice:
+            return
+
+        if os.name == 'nt': npfdevice = '\Device\NPF_' + winguid
+
+        
+
+        dmac = s7_cl.getMac("192.168.1.14", "eth6")
+        device={}
+        device['name_of_station'] = ''
+        device['mac_address'] = dmac
+        s7_cl.flashLED(npfdevice, device, macaddr, 3)
         return None
