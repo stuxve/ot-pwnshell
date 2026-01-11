@@ -355,7 +355,7 @@ class SessionPrompt(CommandPrompt):
 
                 print("\n\n")
             else:
-                print(f"The module {self.module} have no options. Just run it!")
+                print(f"[!] The module {self.module} have no options. Just run it!\n")
             return None
 
     # --------------------------------------------------------------- #
@@ -764,7 +764,8 @@ class SessionPrompt(CommandPrompt):
         if not npfdevice:
             return
 
-        if os.name == 'nt': npfdevice = '\Device\NPF_' + winguid
+        if os.name == 'nt': 
+            npfdevice = r'\\Device\\NPF_' + winguid
 
 
         dmac = s7_cl.getMac("192.168.1.14", "eth6")

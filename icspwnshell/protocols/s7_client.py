@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # coding:utf-8
 # Author: WenZhe Zhu
-from icspwnshell.interfaces.protocol import Base
+#from icspwnshell.interfaces.protocol import Base
 from icspwnshell.protocols.cotp import *
 from icspwnshell.protocols.s7comm import *
 from scapy.supersocket import StreamSocket
@@ -104,7 +104,7 @@ pcap_next_ex.argtypes = [POINTER(c_void_p), POINTER(POINTER(pcap_pkthdr)), POINT
 
 
 
-class S7Client(Base):
+class S7Client():
     def __init__(self, name, ip, port=102, src_tsap='\x01\x00', rack=0, slot=2, timeout=2):
         '''
 
@@ -1209,7 +1209,7 @@ class S7Client(Base):
         return device
 
     def isIpv4(ip):
-        match = re.match("^(\d{0,3})\.(\d{0,3})\.(\d{0,3})\.(\d{0,3})$", ip)
+        match = re.match(r"^(\d{0,3})\.(\d{0,3})\.(\d{0,3})\.(\d{0,3})$", ip)
         if not match:
             return False
         quad = []
