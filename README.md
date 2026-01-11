@@ -82,7 +82,7 @@ This project is heavily inspired by public research and community knowledge:
 
 If you find **ICS PWNSHELL** useful and want to support ongoing research and development, you can buy me a coffee:
 
-👉 **Buy Me a Coffee**: [https://buymeacoffee.com/slashera4s](https://buymeacoffee.com/slashera4s)
+👉 **Buy Me a Coffee**: [https://buymeacoffee.com/stuxve](https://buymeacoffee.com/stuxve)
 
 Every coffee helps keep the research going ❤️
 
