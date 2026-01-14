@@ -219,11 +219,11 @@ class SessionPrompt(CommandPrompt):
     def _cmd_modules(self, tokens):
         if not self.protocol:
             print("\n\n")
-            print("Please select a protocol to see available modules.")
+            print("[!] Please select a protocol to see available modules.")
             return None
 
         print("\n\n")
-        print(f"Available modules for protocol {self.protocol.upper()}:")
+        print(f"[!] Available modules for protocol {self.protocol.upper()}:")
 
         # Find the dictionary for the selected protocol
         protocol_modules = None
