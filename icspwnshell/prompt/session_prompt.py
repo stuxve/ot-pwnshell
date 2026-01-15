@@ -245,7 +245,7 @@ class SessionPrompt(CommandPrompt):
 
     def _cmd_search(self, tokens):
         print("\n\n")
-        print("Searching for a specific module")
+        print("[!] Searching for a specific module")
         return None
 
     def _cmd_set(self, tokens):
