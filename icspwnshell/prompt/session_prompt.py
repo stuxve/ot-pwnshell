@@ -370,7 +370,7 @@ class SessionPrompt(CommandPrompt):
             print("No module selected. Use the 'use' command to select a module.")
         
         if self.module == 'read_coil_status':
-            print(f"Reading {self.get_option_value('count')} coils from {self.get_option_value('target')} starting at address {self.get_option_value('start_address')} on port {self.get_option_value('port')}")
+            #print(f"Reading {self.get_option_value('count')} coils from {self.get_option_value('target')} starting at address {self.get_option_value('start_address')} on port {self.get_option_value('port')}")
             # Here you would add the actual code to perform the Modbus read coils operation
             self.read_coils()
         
