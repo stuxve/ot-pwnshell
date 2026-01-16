@@ -34,8 +34,8 @@ class Modbus():
             self.connection.settimeout(self.timeout)
             self.connection.connect((self.target, self.port))
 
-    def read_coils(self, target, port, count, start_address, timeout=5):
-        self.init_connection(target, port, timeout)
+    def read_coils(self, count, start_address):
+        self.init_connection(self.target, self.port, self.timeout)
         
         request = ModbusHeaderRequest(func_code=0x01) / ReadCoilsRequest(
             ReferenceNumber=start_address,

@@ -570,16 +570,24 @@ class SessionPrompt(CommandPrompt):
         
         mb_cl = Modbus(self.target, self.port)
         options = next(
-        module["options"]
-        for protocol_dict in modules
-        if self.protocol in protocol_dict
-        for module in protocol_dict[self.protocol]
-        if module["name"] == self.protocol
+            (
+                module["options"]
+                for protocol_dict in modules
+                if self.protocol in protocol_dict
+                for module in protocol_dict[self.protocol]
+                if module.get("name") == self.module
+            ),
+            None
         )
+
+        if options is None:
+            raise ValueError(
+                f"No module 'read_coils' found for protocol '{self.protocol}'"
+            )
         count_value = next(o["value"] for o in options if o["name"] == "count")
         start_address_value = next(o["value"] for o in options if o["name"] == "start_address")
         start_address_value = self.parse_start_address(start_address_value)
-        data = mb_cl.read_coils(self.target, self.port, count_value, start_address_value, timeout=5)
+        data = mb_cl.read_coils( count_value, start_address_value)
 
         print(f"Coils data: {data}") 
     
