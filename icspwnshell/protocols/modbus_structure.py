@@ -28,10 +28,10 @@ modbus_exceptions = {
 
 class ModbusHeaderRequest(Packet):
     fields_desc = [
-        ShortField("trans_id", 0x0003),
+        ShortField("trans_id", 0x0000),
         ShortField("proto_id", 0x0000),
         ShortField("length", None),
-        ByteField("unit_id", 0x00),
+        ByteField("unit_id", 0x01),
         ByteEnumField("func_code", 0x03, modbus_function_codes)
         ]
 
