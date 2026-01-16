@@ -591,6 +591,7 @@ class SessionPrompt(CommandPrompt):
         coils = self.decode_coils(data, count_value)
         print(f"[+] {self.target}:{self.port} - {count_value} coil values from address {start_address_value} :")
         print(f"[+] {self.target}:{self.port} - {coils}\n")
+        print(f"[*] Read coils status operation completed.\n")
 
     def decode_coils(self, coils_bytes, count):
         coils = []
