@@ -10,7 +10,7 @@ from .modbus_structure import (
 import socket
 
 class Modbus():
-    def __init__(self):
+    def __init__(self, target=None, port=None, timeout=5):
         self.pdu = None
         self.data = None
         self.length = 0
