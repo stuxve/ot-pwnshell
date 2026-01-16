@@ -10,8 +10,7 @@ from .modbus_structure import (
 import socket
 
 class Modbus():
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self):
         self.pdu = None
         self.data = None
         self.length = 0
