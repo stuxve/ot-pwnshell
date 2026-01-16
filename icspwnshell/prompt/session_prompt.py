@@ -566,7 +566,7 @@ class SessionPrompt(CommandPrompt):
         Returns:
             None
         """
-        print("Reading coils from Modbus device...")
+        print("[+] Reading coils from Modbus device...")
         
         mb_cl = Modbus(self.target, self.port)
         options = next(
@@ -591,7 +591,7 @@ class SessionPrompt(CommandPrompt):
         coils = self.decode_coils(data, count_value)
         print(f"[+] {self.target}:{self.port} - {count_value} coil values from address {start_address_value} :")
         print(f"[+] {self.target}:{self.port} - {coils}\n")
-        
+
     def decode_coils(self, coils_bytes, count):
         coils = []
         for byte in coils_bytes:
