@@ -588,9 +588,16 @@ class SessionPrompt(CommandPrompt):
         start_address_value = next(o["value"] for o in options if o["name"] == "start_address")
         start_address_value = self.parse_start_address(start_address_value)
         data = mb_cl.read_coils( count_value, start_address_value)
-
-        print(f"Coils data: {data}") 
-    
+        coils = self.decode_coils(data, count_value)
+        print(f"Coils data: {coils}") 
+    def decode_coils(self, coils_bytes, count):
+        coils = []
+        for byte in coils_bytes:
+            for bit in range(8):
+                coils.append((byte >> bit) & 0x01)
+                if len(coils) == count:
+                    return coils
+        return coils
     def read_holding_registers(self):
         print("Reading holding registers from Modbus device...")
         
