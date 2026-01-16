@@ -553,7 +553,7 @@ class SessionPrompt(CommandPrompt):
     # --------------------------------------------------------------- #
     # Functions of the modules                                        #
     # --------------------------------------------------------------- #
-    def parse_start_address(value):
+    def parse_start_address(self, value):
         addr = int(value, 16) if isinstance(value, str) and value.lower().startswith("0x") else int(value)
         if addr < 0 or addr > 0xFFFF:
             raise ValueError("start_address out of Modbus range")
