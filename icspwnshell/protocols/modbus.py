@@ -16,8 +16,8 @@ class Modbus():
         self.length = 0
         self.adu = None
         self.connection = None
-        self.target = None
-        self.port = None
+        self.target = target
+        self.port = port
         self.timeout = 5
 
     def close_connection(self):
