@@ -589,7 +589,9 @@ class SessionPrompt(CommandPrompt):
         start_address_value = self.parse_start_address(start_address_value)
         data = mb_cl.read_coils( count_value, start_address_value)
         coils = self.decode_coils(data, count_value)
-        print(f"Coils data: {coils}") 
+        print(f"[+] {self.target}:{self.port} - {count_value} coil values from address {start_address_value} :")
+        print(f"[+] {self.target}:{self.port} - {coils}\n")
+        
     def decode_coils(self, coils_bytes, count):
         coils = []
         for byte in coils_bytes:
