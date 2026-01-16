@@ -372,7 +372,7 @@ class SessionPrompt(CommandPrompt):
         if self.module == 'modbus_read_coils':
             print(f"Reading {self.get_option_value('count')} coils from {self.get_option_value('target')} starting at address {self.get_option_value('start_address')} on port {self.get_option_value('port')}")
             # Here you would add the actual code to perform the Modbus read coils operation
-            self.modbus_read_coils()
+            self.read_coils()
         
         if self.module == 'search_profinet':
             print("[!] Searching for Profinet devices...")
