@@ -648,15 +648,56 @@ class SessionPrompt(CommandPrompt):
         
         mb_cl = Modbus(self.target, self.port)
         options = next(
-        module["options"]
-        for protocol_dict in modules
-        if self.protocol in protocol_dict
-        for module in protocol_dict[self.protocol]
-        if module["name"] == self.protocol
+            (
+                module["options"]
+                for protocol_dict in modules
+                if self.protocol in protocol_dict
+                for module in protocol_dict[self.protocol]
+                if module.get("name") == self.module
+            ),
+            None
         )
+
+        if options is None:
+            raise ValueError(
+                f"No module 'read_coils' found for protocol '{self.protocol}'"
+            )
         count_value = next(o["value"] for o in options if o["name"] == "count")
         start_address_value = next(o["value"] for o in options if o["name"] == "start_address")
-        mb_cl.read_holding_register(self.target, self.port, count_value, start_address_value, timeout=5)
+        data = mb_cl.read_holding_register(self.target, self.port, count_value, start_address_value, timeout=5)+
+        data_decoded = self.decode_data(data, count_value)
+        print(f"[+] {self.target}:{self.port} - {count_value} holding register values from address {start_address_value} :")
+        print(f"[+] {self.target}:{self.port} - {data_decoded}")
+        print(f"[*] Read holding registers operation completed.\n")
+
+    def read_input_registers(self):
+        print("Reading input registers from Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        options = next(
+            (
+                module["options"]
+                for protocol_dict in modules
+                if self.protocol in protocol_dict
+                for module in protocol_dict[self.protocol]
+                if module.get("name") == self.module
+            ),
+            None
+        )
+
+        if options is None:
+            raise ValueError(
+                f"No module 'read_coils' found for protocol '{self.protocol}'"
+            )
+        count_value = next(o["value"] for o in options if o["name"] == "count")
+        start_address_value = next(o["value"] for o in options if o["name"] == "start_address")
+        data = mb_cl.read_input_registers()
+
+        data_decoded = self.decode_data(data, count_value)
+        print(f"[+] {self.target}:{self.port} - {count_value} input register values from address {start_address_value} :")
+        print(f"[+] {self.target}:{self.port} - {data_decoded}")
+        print(f"[*] Read input registers operation completed.\n")
+
 
     def write_single_register(self):
         print("Writing single register to Modbus device...")
@@ -682,17 +723,8 @@ class SessionPrompt(CommandPrompt):
         mb_cl = Modbus(self.target, self.port)
         mb_cl.write_multiple_coils()
     
-    def read_discrete_input(self):
-        print("Reading discrete inputs from Modbus device...")
-        
-        mb_cl = Modbus(self.target, self.port)
-        mb_cl.read_discrete_input()
 
-    def read_input_registers(self):
-        print("Reading input registers from Modbus device...")
-        
-        mb_cl = Modbus(self.target, self.port)
-        mb_cl.read_input_registers()
+    
 
     def masked_write_register(self):
         print("Performing masked write register on Modbus device...")
