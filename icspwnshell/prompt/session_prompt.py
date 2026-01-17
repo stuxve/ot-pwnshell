@@ -584,7 +584,7 @@ class SessionPrompt(CommandPrompt):
             raise ValueError(
                 f"No module 'read_coils' found for protocol '{self.protocol}'"
             )
-        count_value = next(o["value"] for o in options if o["name"] == "count")
+        count_value = next(o["value"] for o in options if o["name"] == "COUNT")
         start_address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
         start_address_value = self.parse_start_address(start_address_value)
         data = mb_cl.read_coils( count_value, start_address_value)
