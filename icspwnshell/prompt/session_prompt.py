@@ -655,11 +655,11 @@ class SessionPrompt(CommandPrompt):
             )
         count_value = next(o["value"] for o in options if o["name"] == "COUNT")
         start_address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
-        if start_address_value < 0 or start_address_value > 0xFFFF:
+        if int(start_address_value) < 0 or int(start_address_value) > 0xFFFF:
             self._print_error("START_ADDRESS out of Modbus range (0-65535)")
             return
         
-        if count_value < 1 or count_value > 125:
+        if int(count_value) < 1 or int(count_value) > 125:
             self._print_error("COUNT out of Modbus range (1-125)")
             return
         data = mb_cl.read_discrete_input(self.target, self.port, count_value, start_address_value, timeout=5)
@@ -771,10 +771,10 @@ class SessionPrompt(CommandPrompt):
         address_value = next(o["value"] for o in options if o["name"] == "ADDRESS")
         value_value = next(o["value"] for o in options if o["name"] == "VALUE")
         
-        if address_value < 0 or address_value > 0xFFFF:
+        if int(address_value) < 0 or int(address_value) > 0xFFFF:
             self._print_error("ADDRESS out of Modbus range (0-65535)")
             return
-        if value_value < 0 or value_value > 0xFFFF:
+        if int(value_value) < 0 or int(value_value) > 0xFFFF:
             self._print_error("VALUE out of Modbus range (0-65535)")
             return
 
@@ -806,7 +806,7 @@ class SessionPrompt(CommandPrompt):
             self._print_error("[!] VALUE must be 0 (OFF) or 1 (ON)")
             return
         
-        if address_value < 0 or address_value > 0xFFFF:
+        if int(address_value) < 0 or int(address_value) > 0xFFFF:
             self._print_error("ADDRESS out of Modbus range (0-65535)")
             return
 
