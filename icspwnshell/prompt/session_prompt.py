@@ -271,12 +271,12 @@ class SessionPrompt(CommandPrompt):
                 self._print_error('Invalid IP address')
                 return
             else:
-                print(f"[!] Set rhost to {value}\n")
+                print(f"[!] Set RHOST to {value}\n")
                 self.target = value
         if value.lower() == 'rport':
             if value < 0 or value > 65535:
                 self.port = value
-                print(f"[!] Set rport to {value}\n")
+                print(f"[!] Set RPORT to {value}\n")
 
         # Check if a module is selected
         if self.module == '':
@@ -531,8 +531,8 @@ class SessionPrompt(CommandPrompt):
                                 if module['name'] == self.module), [])
             option_names = [option['name'] for option in module_options]
             nested_commands['set'] = {name: None for name in option_names}
-            nested_commands['set']['rhost'] = None
-            nested_commands['set']['rport'] = None
+            nested_commands['set']['RHOST'] = None
+            nested_commands['set']['RPORT'] = None
 
 
             
