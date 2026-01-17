@@ -662,8 +662,8 @@ class SessionPrompt(CommandPrompt):
             raise ValueError(
                 f"No module 'read_coils' found for protocol '{self.protocol}'"
             )
-        count_value = next(o["value"] for o in options if o["name"] == "count")
-        start_address_value = next(o["value"] for o in options if o["name"] == "start_address")
+        count_value = next(o["value"] for o in options if o["name"] == "COUNT")
+        start_address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
         data = mb_cl.read_holding_register(self.target, self.port, count_value, start_address_value, timeout=5)
         data_decoded = self.decode_data(data, count_value)
         print(f"[+] {self.target}:{self.port} - {count_value} holding register values from address {start_address_value} :")
@@ -689,8 +689,8 @@ class SessionPrompt(CommandPrompt):
             raise ValueError(
                 f"No module 'read_coils' found for protocol '{self.protocol}'"
             )
-        count_value = next(o["value"] for o in options if o["name"] == "count")
-        start_address_value = next(o["value"] for o in options if o["name"] == "start_address")
+        count_value = next(o["value"] for o in options if o["name"] == "COUNT")
+        start_address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
         data = mb_cl.read_input_registers()
 
         data_decoded = self.decode_data(data, count_value)
