@@ -374,6 +374,11 @@ class SessionPrompt(CommandPrompt):
             # Here you would add the actual code to perform the Modbus read coils operation
             self.read_coils()
         
+        if self.module == 'read_discrete_input':
+            #print(f"Reading {self.get_option_value('count')} discrete inputs from {self.get_option_value('target')} starting at address {self.get_option_value('start_address')} on port {self.get_option_value('port')}")
+            # Here you would add the actual code to perform the Modbus read discrete inputs operation
+            self.read_discrete_inputs()
+
         if self.module == 'search_profinet':
             print("[!] Searching for Profinet devices...")
             # Here you would add the actual code to perform the Profinet search operation
@@ -601,6 +606,22 @@ class SessionPrompt(CommandPrompt):
                 if len(coils) == count:
                     return coils
         return coils
+    def read_discrete_inputs(self):
+        print("Reading discrete inputs from Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        options = next(
+        module["options"]
+        for protocol_dict in modules
+        if self.protocol in protocol_dict
+        for module in protocol_dict[self.protocol]
+        if module["name"] == self.protocol
+        )
+        count_value = next(o["value"] for o in options if o["name"] == "count")
+        start_address_value = next(o["value"] for o in options if o["name"] == "start_address")
+        mb_cl.read_discrete_input(self.target, self.port, count_value, start_address_value, timeout=5)
+
+
     def read_holding_registers(self):
         print("Reading holding registers from Modbus device...")
         

@@ -5,7 +5,7 @@ MODULES = [
                 {'name': 'COUNT', 'desc': 'Number of coils to read', "mandatory":True, "value": 10},
                 {'name': 'START_ADDRESS', 'desc': 'Starting address to read from', "mandatory":True, "value": 0}
             ]},
-            {'name': 'read_input_status', 'desc': 'Modbus Read Discrete Inputs ', "options": [
+            {'name': 'read_discrete_input', 'desc': 'Modbus Read Discrete Inputs ', "options": [
                 {'name': 'COUNT', 'desc': 'Number of discrete inputs to read', "mandatory":True, "value": 10},
                 {'name': 'START_ADDRESS', 'desc': 'Starting address to read from', "mandatory":True, "value": 0}
             ]},
