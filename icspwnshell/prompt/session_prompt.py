@@ -844,6 +844,11 @@ class SessionPrompt(CommandPrompt):
             )
         value_value = next(o["value"] for o in options if o["name"] == "VALUES")
         address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
+        address_value = int(address_value)
+        if int(address_value) < 0 or int(address_value) > 0xFFFF
+            self._print_error("START_ADDRESS out of Modbus range (0-65535)")
+            return
+        
         values_list = value_value.split(',')
         value_value = [int(v) for v in values_list]
 
@@ -880,7 +885,10 @@ class SessionPrompt(CommandPrompt):
             )
         value_value = next(o["value"] for o in options if o["name"] == "VALUES")
         address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
-
+        address_value = int(address_value)
+        if int(address_value) < 0 or int(address_value) > 0xFFFF
+            self._print_error("START_ADDRESS out of Modbus range (0-65535)")
+            return
         value_value = list(value_value)                 # ['0','1','1','0','1','0','0','0','1']
         value_value = [int(v) for v in value_value] 
         bit_count = len(value_value)   # [0,1,1,0,1,0,0,0,1]
