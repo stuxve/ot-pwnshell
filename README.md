@@ -40,6 +40,7 @@ python -m icspwnshell.main
 
 Once inside, use `help` to explore available commands and protocols.
 
+
 ---
 
 ## 🧠 Roadmap / TODO
@@ -84,7 +85,82 @@ This project is heavily inspired by public research and community knowledge:
   [https://github.com/dark-lbp/isf/blob/master/icssploit/modules/exploits/plcs/siemens/s7_1200_plc_control.py](https://github.com/dark-lbp/isf/blob/master/icssploit/modules/exploits/plcs/siemens/s7_1200_plc_control.py)
 
 ---
+## Data Structures
 
+### Coils
+
+- Size: 1 bit (ON / OFF)
+
+- Access: Read and write
+
+- Typical use: Digital actuators
+
+#### Examples
+
+- Start / stop a motor
+
+- Open / close a valve
+
+- Activate a relay
+
+
+
+Think of them as buttons or switches
+
+### Discrete Inputs
+
+- Size: 1 bit
+
+- Access: Read-only
+
+- Typical use: Digital sensors
+
+#### Examples
+
+- Limit switch
+
+- Presence sensor
+
+- Contact status
+
+They are like LEDs you can only observe
+
+### Input Registers
+
+- Size: 16 bits (2 bytes)
+
+- Access: Read-only
+
+- Typical use: Analog measurements
+
+#### Examples
+
+- Temperature
+
+- Pressure
+
+- Voltage
+
+- Current
+
+### Holding Registers
+
+- Size: 16 bits
+
+- Access: Read and write
+
+- Typical use: Configuration and setpoints
+
+#### Examples
+
+- Temperature setpoint
+
+- Motor speed
+
+- PLC parameters
+
+- Counters
+---
 ## ☕ Support the Project
 
 If you find **ICS PWNSHELL** useful and want to support ongoing research and development, you can buy me a coffee:
