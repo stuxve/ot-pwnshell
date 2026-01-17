@@ -390,6 +390,16 @@ class SessionPrompt(CommandPrompt):
             # Here you would add the actual code to perform the Modbus read input registers operation
             self.read_input_registers()
 
+        if self.module == 'write_single_coil':
+            #print(f"Writing single coil to {self.get_option_value('target')} at address {self.get_option_value('address')} with value {self.get_option_value('values')} on port {self.get_option_value('port')}")
+            # Here you would add the actual code to perform the Modbus write single coil operation
+            self.write_single_coil()
+
+        if self.module == 'write_single_register':
+            #print(f"Writing single holding register to {self.get_option_value('target')} at address {self.get_option_value('address')} with value {self.get_option_value('values')} on port {self.get_option_value('port')}")
+            # Here you would add the actual code to perform the Modbus write single holding register operation
+            self.write_single_register()
+
         if self.module == 'search_profinet':
             print("[!] Searching for Profinet devices...")
             # Here you would add the actual code to perform the Profinet search operation
@@ -603,6 +613,13 @@ class SessionPrompt(CommandPrompt):
         count_value = next(o["value"] for o in options if o["name"] == "COUNT")
         start_address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
         start_address_value = self.parse_start_address(start_address_value)
+        if start_address_value < 0 or start_address_value > 0xFFFF:
+            self._print_error("START_ADDRESS out of Modbus range (0-65535)")
+            return
+        
+        if count_value < 1 or count_value > 125:
+            self._print_error("COUNT out of Modbus range (1-125)")
+            return
         data = mb_cl.read_coils( count_value, start_address_value)
         coils = self.decode_coils(data, count_value)
         print(f"[+] {self.target}:{self.port} - {count_value} coil values from address {start_address_value} :")
@@ -638,6 +655,13 @@ class SessionPrompt(CommandPrompt):
             )
         count_value = next(o["value"] for o in options if o["name"] == "COUNT")
         start_address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
+        if start_address_value < 0 or start_address_value > 0xFFFF:
+            self._print_error("START_ADDRESS out of Modbus range (0-65535)")
+            return
+        
+        if count_value < 1 or count_value > 125:
+            self._print_error("COUNT out of Modbus range (1-125)")
+            return
         data = mb_cl.read_discrete_input(self.target, self.port, count_value, start_address_value, timeout=5)
         decoded_inputs = self.decode_data(data, count_value)
         print(f"[+] {self.target}:{self.port} - {count_value} discrete input values from address {start_address_value} :")
@@ -665,6 +689,13 @@ class SessionPrompt(CommandPrompt):
             )
         count_value = next(o["value"] for o in options if o["name"] == "COUNT")
         start_address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
+        if start_address_value < 0 or start_address_value > 0xFFFF:
+            self._print_error("START_ADDRESS out of Modbus range (0-65535)")
+            return
+        
+        if count_value < 1 or count_value > 125:
+            self._print_error("COUNT out of Modbus range (1-125)")
+            return
         data = mb_cl.read_holding_register(self.target, self.port, count_value, start_address_value, timeout=5)
         data_decoded = self.decode_data(data, count_value)
         print(f"[+] {self.target}:{self.port} - {count_value} holding register values from address {start_address_value} :")
@@ -692,6 +723,15 @@ class SessionPrompt(CommandPrompt):
             )
         count_value = next(o["value"] for o in options if o["name"] == "COUNT")
         start_address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
+
+        if start_address_value < 0 or start_address_value > 0xFFFF:
+            self._print_error("START_ADDRESS out of Modbus range (0-65535)")
+            return
+        
+        if count_value < 1 or count_value > 125:
+            self._print_error("COUNT out of Modbus range (1-125)")
+            return
+
         data = mb_cl.read_input_registers(self.target, self.port, count_value, start_address_value, timeout=5)
 
         data_decoded = self.decode_data(data, count_value)
@@ -702,21 +742,82 @@ class SessionPrompt(CommandPrompt):
 
     def write_single_register(self):
         print("Writing single register to Modbus device...")
-        
-        mb_cl = Modbus(self.target, self.port)
-        mb_cl.write_single_register()
+        options = next(
+            (
+                module["options"]
+                for protocol_dict in modules
+                if self.protocol in protocol_dict
+                for module in protocol_dict[self.protocol]
+                if module.get("name") == self.module
+            ),
+            None
+        )
 
-    def write_coil(self):
-        print("Writing coil to Modbus device...")
+        options = next(
+            (
+                module["options"]
+                for protocol_dict in modules
+                if self.protocol in protocol_dict
+                for module in protocol_dict[self.protocol]
+                if module.get("name") == self.module
+            ),
+            None
+        )
+
+        if options is None:
+            raise ValueError(
+                f"No module 'read_coils' found for protocol '{self.protocol}'"
+            )
+        address_value = next(o["value"] for o in options if o["name"] == "ADDRESS")
+        value_value = next(o["value"] for o in options if o["name"] == "VALUE")
         
+        if address_value < 0 or address_value > 0xFFFF:
+            self._print_error("ADDRESS out of Modbus range (0-65535)")
+            return
+        if value_value < 0 or value_value > 0xFFFF:
+            self._print_error("VALUE out of Modbus range (0-65535)")
+            return
+
         mb_cl = Modbus(self.target, self.port)
-        mb_cl.write_coil()
+        mb_cl.write_single_register(self.target, self.port, address_value, value_value)
+
+    def write_single_coil(self):
+        print("Writing coil to Modbus device...")
+        options = next(
+            (
+                module["options"]
+                for protocol_dict in modules
+                if self.protocol in protocol_dict
+                for module in protocol_dict[self.protocol]
+                if module.get("name") == self.module
+            ),
+            None
+        )
+
+        if options is None:
+            raise ValueError(
+                f"No module 'read_coils' found for protocol '{self.protocol}'"
+            )
+        address_value = next(o["value"] for o in options if o["name"] == "ADDRESS")
+        value_value = next(o["value"] for o in options if o["name"] == "VALUE")
+        
+        if value_value != 0 or value_value != 1:
+            self._print_error("VALUE must be 0 (OFF) or 1 (ON)")
+            return
+        
+        if address_value < 0 or address_value > 0xFFFF:
+            self._print_error("ADDRESS out of Modbus range (0-65535)")
+            return
+
+        mb_cl = Modbus(self.target, self.port)
+        mb_cl.write_single_coil(self.target, self.port, address_value, value_value)
     
     def write_multiple_registers(self):
         print("Writing multiple registers to Modbus device...")
+        print("Writing coil to Modbus device...")
         
         mb_cl = Modbus(self.target, self.port)
-        mb_cl.write_multiple_registers()
+        mb_cl.write_multiple_registers(self.target, self.port, address_value, value_value)
     
     def write_multiple_coils(self):
         print("Writing multiple coils to Modbus device...")

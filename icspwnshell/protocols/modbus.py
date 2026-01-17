@@ -55,7 +55,7 @@ class Modbus():
             print("Error in the response")
             return None
     
-    def write_coil(self, target, port, address, value, timeout=5):
+    def write_single_coil(self, target, port, address, value, timeout=5):
         self.init_connection(target, port, timeout)
         
         request = ModbusHeaderRequest(func_code=0x05) / WriteSingleCoilRequest(
