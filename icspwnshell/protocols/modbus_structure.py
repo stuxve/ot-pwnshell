@@ -336,6 +336,12 @@ class ReadFIFOQueueResponse(Packet):
                        length_from=lambda pkt: pkt.ByteCount)
     ]
 
+class ReadDeviceIdentificationRequest(Packet):
+    fields_desc = [
+        ByteField("MEIType", 0x0E),
+        ByteField("ReadDeviceIDCode", 0x01),
+        ByteField("ObjectID", 0x00)
+    ]
 
 # Error packet
 class GenericError(Packet):
