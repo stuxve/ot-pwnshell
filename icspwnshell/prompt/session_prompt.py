@@ -815,8 +815,13 @@ class SessionPrompt(CommandPrompt):
             )
         address_value = next(o["value"] for o in options if o["name"] == "ADDRESS")
         value_value = next(o["value"] for o in options if o["name"] == "VALUE")
+        loop_value = next(o["value"] for o in options if o["name"] == "LOOP")
+        loop_value = bool(loop_value)
         value_value = int(value_value)
-        address_value = int(address_value)            
+        address_value = int(address_value) 
+
+
+
         if int(value_value) != 0 and int(value_value) != 1:
             print(f"{value_value}")
             self._print_error("[!] VALUE must be 0 (OFF) or 1 (ON)")
@@ -827,6 +832,16 @@ class SessionPrompt(CommandPrompt):
             return
 
         mb_cl = Modbus(self.target, self.port)
+        if loop_value:
+            print(f"[+] Starting loop to write coil at address {address_value} with value {value_value} on {self.target}:{self.port}")
+            try:
+                while True:
+                    mb_cl.write_single_coil(self.target, self.port, address_value, value_value)
+                    time.sleep(1)  # Sleep for 1 second between writes
+            except KeyboardInterrupt:
+                print("\n[!] Loop interrupted by user. Exiting loop.")
+                return
+        
         mb_cl.write_single_coil(self.target, self.port, address_value, value_value)
     
     def write_multiple_registers(self):

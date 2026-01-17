@@ -19,7 +19,8 @@ MODULES = [
             ]},
             {'name': 'write_single_coil', 'desc': 'Modbus Write Single Coil ', "options": [
                 {'name': 'ADDRESS', 'desc': 'Address to write to', "mandatory":True, "value": 0},
-                {'name': 'VALUE', 'desc': 'Value to write (0 or 1)', "mandatory":True, "value": 1}
+                {'name': 'VALUE', 'desc': 'Value to write (0 or 1)', "mandatory":True, "value": 1},
+                {'name': 'LOOP', 'desc': 'Loop the write operation (True/False)', "mandatory":False, "value": False}	
             ]},
             {'name': 'write_single_register', 'desc': 'Modbus Write Single Holding Register ', "options": [
                 {'name': 'ADDRESS', 'desc': 'Address to write to', "mandatory":True, "value": 0},

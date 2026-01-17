@@ -55,6 +55,7 @@ Planned and in-progress features:
 * [ ] 0x06 Write Single Register (Modbus)
 * [ ] 0x0F Write Multiple Coils (Modbus)
 * [ ] 0x10 Write Multiple Registers (Modbus)
+* [ ] Modbus banner grabbing
 * [ ] Advanced Modbus functions
 * [ ] Profinet device discovery
 * [ ] Siemens S7 client connection (`whoami`-style info)
