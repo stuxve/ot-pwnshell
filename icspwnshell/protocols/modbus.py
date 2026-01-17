@@ -159,7 +159,7 @@ class Modbus():
         request = ModbusHeaderRequest(func_code=0x0F) / WriteMultipleCoilsRequest(
             ReferenceNumber=start_address,
             BitCount=len(values),
-            Coil=values
+            Coils=values
         )
         
         self.send_packet(request)
