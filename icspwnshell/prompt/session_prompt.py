@@ -664,7 +664,7 @@ class SessionPrompt(CommandPrompt):
             )
         count_value = next(o["value"] for o in options if o["name"] == "count")
         start_address_value = next(o["value"] for o in options if o["name"] == "start_address")
-        data = mb_cl.read_holding_register(self.target, self.port, count_value, start_address_value, timeout=5)+
+        data = mb_cl.read_holding_register(self.target, self.port, count_value, start_address_value, timeout=5)
         data_decoded = self.decode_data(data, count_value)
         print(f"[+] {self.target}:{self.port} - {count_value} holding register values from address {start_address_value} :")
         print(f"[+] {self.target}:{self.port} - {data_decoded}")
