@@ -27,11 +27,10 @@ MODULES = [
             ]},
             {'name': 'write_multiple_coils', 'desc': 'Modbus Write Multiple Coils ', "options": [
                 {'name': 'START_ADDRESS', 'desc': 'Starting address to write to', "mandatory":True, "value": 0},
-                {'name': 'VALUES', 'desc': 'List of values to write (0 or 1)', "mandatory":True, "value": [1,0,1,0,1]}
+                {'name': 'VALUES', 'desc': 'List of values to write in binary (0100101)', "mandatory":True, "value": [1,0,1,0,1]}
             ]},
             {'name': 'write_multiple_registers', 'desc': 'Modbus Write Multiple Holding Registers ', "options": [
-                    {'name': 'START_ADDRESS', 'desc': 'Starting address to write to', "mandatory":True, "value": 0},
-                    {'name': 'VALUES', 'desc': 'List of values to write (0-65535)', "mandatory":True, "value": [100,200,300]}
+                    {'name': 'VALUES', 'desc': 'List of values to write separated by commas 0,1,2,3,4', "mandatory":True, "value": [100,200,300]}
             ]}
         ]
         
