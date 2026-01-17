@@ -723,7 +723,7 @@ class SessionPrompt(CommandPrompt):
             )
         count_value = next(o["value"] for o in options if o["name"] == "COUNT")
         start_address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
-
+        
         if start_address_value < 0 or start_address_value > 0xFFFF:
             self._print_error("START_ADDRESS out of Modbus range (0-65535)")
             return
@@ -770,7 +770,8 @@ class SessionPrompt(CommandPrompt):
             )
         address_value = next(o["value"] for o in options if o["name"] == "ADDRESS")
         value_value = next(o["value"] for o in options if o["name"] == "VALUE")
-        
+        value_value = int(value_value)
+        address_value = int(address_value)
         if int(address_value) < 0 or int(address_value) > 0xFFFF:
             self._print_error("ADDRESS out of Modbus range (0-65535)")
             return
@@ -800,7 +801,8 @@ class SessionPrompt(CommandPrompt):
             )
         address_value = next(o["value"] for o in options if o["name"] == "ADDRESS")
         value_value = next(o["value"] for o in options if o["name"] == "VALUE")
-        
+        value_value = int(value_value)
+        address_value = int(address_value)            
         if int(value_value) != 0 and int(value_value) != 1:
             print(f"{value_value}")
             self._print_error("[!] VALUE must be 0 (OFF) or 1 (ON)")
