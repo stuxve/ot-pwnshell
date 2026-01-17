@@ -621,7 +621,7 @@ class SessionPrompt(CommandPrompt):
             self._print_error("COUNT out of Modbus range (1-125)")
             return
         data = mb_cl.read_coils( count_value, start_address_value)
-        coils = self.decode_coils(data, count_value)
+        coils = self.decode_data(data, count_value)
         print(f"[+] {self.target}:{self.port} - {count_value} coil values from address {start_address_value} :")
         print(f"[+] {self.target}:{self.port} - {coils}")
         print(f"[*] Read coils status operation completed.\n")
