@@ -467,7 +467,7 @@ class SessionPrompt(CommandPrompt):
         print(
             "\n ICS Pwnshell - Tool to interact with industrial devices\n"+
             "   -  set VARIABLE VALUE             Set a value to a varible.\n"+
-            "   -  use PROTOCOL | MODULE          Use a protocol (S7comm/Modbus/Opcua) or use module from protocol.\n"+
+            "   -  use-protocol | module          Use a protocol (S7comm/Modbus/Opcua) or use module from protocol.\n"+
             "   -  modules                        Show available modules.\n"+
             "   -  protocols                      Show available protocols.\n"+
             "   -  exploit                        Send the action against the target.\n"+
@@ -525,7 +525,7 @@ class SessionPrompt(CommandPrompt):
         nested_commands = {}
         
         # Add all base commands first
-        for cmd_name in self.commands.keys():
+        for cmd_name in sorted(self.commands.keys()):
             nested_commands[cmd_name] = None  # Default to no subcommands
         
         # Now add protocol-specific nested commands
