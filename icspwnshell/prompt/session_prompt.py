@@ -784,6 +784,8 @@ class SessionPrompt(CommandPrompt):
             )
         address_value = next(o["value"] for o in options if o["name"] == "ADDRESS")
         value_value = next(o["value"] for o in options if o["name"] == "VALUE")
+        loop_value = next(o["value"] for o in options if o["name"] == "LOOP")
+        loop_value = bool(loop_value)
         value_value = int(value_value)
         address_value = int(address_value)
         if int(address_value) < 0 or int(address_value) > 0xFFFF:
@@ -794,7 +796,17 @@ class SessionPrompt(CommandPrompt):
             return
 
         mb_cl = Modbus(self.target, self.port)
-        mb_cl.write_single_register(self.target, self.port, address_value, value_value)
+        if loop_value:
+            print(f"[+] Starting loop to write register at address {address_value} with value {value_value} on {self.target}:{self.port}")
+            try:
+                while True:
+                    mb_cl.write_single_register(self.target, self.port, address_value, value_value)
+                    time.sleep(1)  # Sleep for 1 second between writes
+            except KeyboardInterrupt:
+                print("\n[!] Loop interrupted by user. Exiting loop.")
+                return
+        else:
+            mb_cl.write_single_register(self.target, self.port, address_value, value_value)
 
     def write_single_coil(self):
         print("Writing coil to Modbus device...")
@@ -841,8 +853,8 @@ class SessionPrompt(CommandPrompt):
             except KeyboardInterrupt:
                 print("\n[!] Loop interrupted by user. Exiting loop.")
                 return
-        
-        mb_cl.write_single_coil(self.target, self.port, address_value, value_value)
+        else:
+            mb_cl.write_single_coil(self.target, self.port, address_value, value_value)
     
     def write_multiple_registers(self):
         print("Writing multiple registers to Modbus device...")
