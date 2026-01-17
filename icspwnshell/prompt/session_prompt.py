@@ -379,6 +379,16 @@ class SessionPrompt(CommandPrompt):
             # Here you would add the actual code to perform the Modbus read discrete inputs operation
             self.read_discrete_inputs()
 
+        if self.module == 'read_holding_registers':
+            #print(f"Reading {self.get_option_value('count')} holding registers from {self.get_option_value('target')} starting at address {self.get_option_value('start_address')} on port {self.get_option_value('port')}")
+            # Here you would add the actual code to perform the Modbus read holding registers operation
+            self.read_holding_registers()
+
+        if self.module == 'read_input_registers':
+            #print(f"Reading {self.get_option_value('count')} input registers from {self.get_option_value('target')} starting at address {self.get_option_value('start_address')} on port {self.get_option_value('port')}")
+            # Here you would add the actual code to perform the Modbus read input registers operation
+            self.read_input_registers()
+
         if self.module == 'search_profinet':
             print("[!] Searching for Profinet devices...")
             # Here you would add the actual code to perform the Profinet search operation
@@ -610,7 +620,6 @@ class SessionPrompt(CommandPrompt):
         print("Reading discrete inputs from Modbus device...")
         
         mb_cl = Modbus(self.target, self.port)
-        print(f"DEBUG: self.protocol = {self.protocol}")
         options = next(
             (
                 module["options"]
