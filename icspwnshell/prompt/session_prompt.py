@@ -617,8 +617,8 @@ class SessionPrompt(CommandPrompt):
         for module in protocol_dict[self.protocol]
         if module["name"] == self.protocol
         )
-        count_value = next(o["value"] for o in options if o["name"] == "count")
-        start_address_value = next(o["value"] for o in options if o["name"] == "start_address")
+        count_value = next(o["value"] for o in options if o["name"] == "COUNT")
+        start_address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
         mb_cl.read_discrete_input(self.target, self.port, count_value, start_address_value, timeout=5)
 
 
