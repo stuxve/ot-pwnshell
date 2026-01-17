@@ -1,7 +1,7 @@
 MODULES = [
     {
         'modbus': [
-            {'name': 'read_coil_status', 'desc': 'Modbus Read Coils ', "options": [
+            {'name': 'read_coils', 'desc': 'Modbus Read Coils ', "options": [
                 {'name': 'COUNT', 'desc': 'Number of coils to read', "mandatory":True, "value": 10},
                 {'name': 'START_ADDRESS', 'desc': 'Starting address to read from', "mandatory":True, "value": 0}
             ]},
