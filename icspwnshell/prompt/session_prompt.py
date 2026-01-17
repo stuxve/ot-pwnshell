@@ -612,12 +612,20 @@ class SessionPrompt(CommandPrompt):
         mb_cl = Modbus(self.target, self.port)
         print(f"DEBUG: self.protocol = {self.protocol}")
         options = next(
-        module["options"]
-        for protocol_dict in modules
-        if self.protocol in protocol_dict
-        for module in protocol_dict[self.protocol]
-        if module["name"] == self.protocol
+            (
+                module["options"]
+                for protocol_dict in modules
+                if self.protocol in protocol_dict
+                for module in protocol_dict[self.protocol]
+                if module.get("name") == self.module
+            ),
+            None
         )
+
+        if options is None:
+            raise ValueError(
+                f"No module 'read_coils' found for protocol '{self.protocol}'"
+            )
         count_value = next(o["value"] for o in options if o["name"] == "COUNT")
         start_address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
         mb_cl.read_discrete_input(self.target, self.port, count_value, start_address_value, timeout=5)
