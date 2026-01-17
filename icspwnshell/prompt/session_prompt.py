@@ -849,7 +849,18 @@ class SessionPrompt(CommandPrompt):
 
         mb_cl = Modbus(self.target, self.port)
         mb_cl.write_multiple_registers(self.target, self.port, address_value, value_value)
-    
+    def bits_to_bytes(self, bits):
+        """Convert a list of 0/1 integers to bytes for Modbus coils."""
+        b = 0
+        result = []
+        for i, bit in enumerate(bits):
+            b |= (bit & 1) << (i % 8)  # pack bits into byte
+            if (i % 8) == 7:
+                result.append(b)
+                b = 0
+        if len(bits) % 8 != 0:
+            result.append(b)
+        return bytes(result)
     def write_multiple_coils(self):
         print("Writing multiple coils to Modbus device...")
         options = next(
@@ -870,7 +881,9 @@ class SessionPrompt(CommandPrompt):
         value_value = next(o["value"] for o in options if o["name"] == "VALUES")
         address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
 
-        value_value = bytes(value_value)
+        value_value = list(value_value)                 # ['0','1','1','0','1','0','0','0','1']
+        value_value = [int(v) for v in value_value]    # [0,1,1,0,1,0,0,0,1]
+        value_value = self.bits_to_bytes(value_value)       # b'\x6d\x01' or similar
 
         mb_cl = Modbus(self.target, self.port)
         mb_cl.write_multiple_coils(self.target, self.port, address_value, value_value)
