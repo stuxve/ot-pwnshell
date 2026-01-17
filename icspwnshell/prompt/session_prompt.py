@@ -598,7 +598,7 @@ class SessionPrompt(CommandPrompt):
         print(f"[+] {self.target}:{self.port} - {coils}")
         print(f"[*] Read coils status operation completed.\n")
 
-    def decode_coils(self, coils_bytes, count):
+    def decode_data(self, coils_bytes, count):
         coils = []
         for byte in coils_bytes:
             for bit in range(8):
@@ -628,8 +628,11 @@ class SessionPrompt(CommandPrompt):
             )
         count_value = next(o["value"] for o in options if o["name"] == "COUNT")
         start_address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
-        mb_cl.read_discrete_input(self.target, self.port, count_value, start_address_value, timeout=5)
-
+        data = mb_cl.read_discrete_input(self.target, self.port, count_value, start_address_value, timeout=5)
+        decoded_inputs = self.decode_data(data, count_value)
+        print(f"[+] {self.target}:{self.port} - {count_value} discrete input values from address {start_address_value} :")
+        print(f"[+] {self.target}:{self.port} - {decoded_inputs}")
+        print(f"[*] Read discrete inputs operation completed.\n")
 
     def read_holding_registers(self):
         print("Reading holding registers from Modbus device...")
