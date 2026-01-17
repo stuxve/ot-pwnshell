@@ -801,7 +801,6 @@ class SessionPrompt(CommandPrompt):
             try:
                 while True:
                     mb_cl.write_single_register(self.target, self.port, address_value, value_value)
-                    time.sleep(1)  # Sleep for 1 second between writes
             except KeyboardInterrupt:
                 print("\n[!] Loop interrupted by user. Exiting loop.")
                 return
@@ -849,7 +848,6 @@ class SessionPrompt(CommandPrompt):
             try:
                 while True:
                     mb_cl.write_single_coil(self.target, self.port, address_value, value_value)
-                    time.sleep(1)  # Sleep for 1 second between writes
             except KeyboardInterrupt:
                 print("\n[!] Loop interrupted by user. Exiting loop.")
                 return
