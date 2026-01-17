@@ -525,7 +525,7 @@ class SessionPrompt(CommandPrompt):
         nested_commands = {}
         
         # Add all base commands first
-        for cmd_name in sorted(self.commands.keys()):
+        for cmd_name in self.commands.keys():
             nested_commands[cmd_name] = None  # Default to no subcommands
         
         # Now add protocol-specific nested commands
@@ -535,6 +535,14 @@ class SessionPrompt(CommandPrompt):
                                     if self.protocol in protocol_dict), [])
             module_names = [module['name'] for module in protocol_modules]
             nested_commands['use-module'] = {name: None for name in module_names}
+        else:
+            # If no protocol is selected, add protocol options
+            nested_commands['use-protocol'] = {
+                'modbus': None,
+                's7comm': None,
+                'profinet': None
+            }
+            
             
 
         # Add module-specific options
