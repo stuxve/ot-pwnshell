@@ -184,7 +184,7 @@ class WriteMultipleCoilsRequest(Packet):
         ShortField("ReferenceNumber", 0x0000),
         FieldLenField("BitCount", None, fmt="H", count_of="Values"),  # Bit count (1-800)
         FieldLenField("ByteCount", None, fmt="B", length_of="Values", adjust=lambda pkt, x:x / 16),
-        FieldListField("Values", None, BitField("data", 0x0, size=1), count_from=lambda pkt: pkt.BitCount)
+        FieldListField("Coils", None, BitField("data", 0x0, size=1), count_from=lambda pkt: pkt.BitCount)
     ]
 
 
