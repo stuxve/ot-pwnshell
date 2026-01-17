@@ -153,12 +153,12 @@ class Modbus():
             print("Error in the response")
             return None
     
-    def write_multiple_coils(self, target, port, start_address, values, timeout=5):
+    def write_multiple_coils(self, target, port, start_address, values, bit_count, timeout=5):
         self.init_connection(target, port, timeout)
         
         request = ModbusHeaderRequest(func_code=0x0F) / WriteMultipleCoilsRequest(
             ReferenceNumber=start_address,
-            BitCount=len(values),
+            BitCount=bit_count,
             Coils=values
         )
         

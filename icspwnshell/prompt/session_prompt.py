@@ -882,11 +882,12 @@ class SessionPrompt(CommandPrompt):
         address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
 
         value_value = list(value_value)                 # ['0','1','1','0','1','0','0','0','1']
-        value_value = [int(v) for v in value_value]    # [0,1,1,0,1,0,0,0,1]
+        value_value = [int(v) for v in value_value] 
+        bit_count = len(value_value)   # [0,1,1,0,1,0,0,0,1]
         value_value = self.bits_to_bytes(value_value)       # b'\x6d\x01' or similar
 
         mb_cl = Modbus(self.target, self.port)
-        mb_cl.write_multiple_coils(self.target, self.port, address_value, value_value)
+        mb_cl.write_multiple_coils(self.target, self.port, address_value, value_value, bit_count)
     
 
     
