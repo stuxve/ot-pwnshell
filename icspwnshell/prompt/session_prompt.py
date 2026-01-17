@@ -4,6 +4,7 @@ import sys, time
 import threading
 from typing import TYPE_CHECKING
 from icspwnshell.prompt.commands.completer import CommandCompleter
+from icspwnshell.prompt.commands.nested_commands import PROTOCOLS
 from icspwnshell.protocols.s7_client import S7Client
 from prompt_toolkit import HTML, print_formatted_text
 from prompt_toolkit.styles import Style, merge_styles
@@ -536,7 +537,7 @@ class SessionPrompt(CommandPrompt):
             module_names = [module['name'] for module in protocol_modules]
             nested_commands['use-module'] = {name: None for name in module_names}
         if not self.protocol:
-            nested_commands['use-protocol'] = {p: None for p in sorted(['modbus', 's7comm', 'profinet'])}
+            nested_commands['use-protocol'] = {p: None for p in sorted(PROTOCOLS)}
         # Add module-specific options
         if self.module:
             # Find the options for the selected module
