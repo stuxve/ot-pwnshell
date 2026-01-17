@@ -870,8 +870,7 @@ class SessionPrompt(CommandPrompt):
         value_value = next(o["value"] for o in options if o["name"] == "VALUES")
         address_value = next(o["value"] for o in options if o["name"] == "START_ADDRESS")
 
-        value_list = list(value_value)
-        value_value = [int(v) for v in value_list]
+        value_value = bytes(value_value)
 
         mb_cl = Modbus(self.target, self.port)
         mb_cl.write_multiple_coils(self.target, self.port, address_value, value_value)

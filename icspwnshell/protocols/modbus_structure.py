@@ -201,7 +201,7 @@ class WriteMultipleRegistersRequest(Packet):
         ShortField("ReferenceNumber", 0x0000),
         FieldLenField("WordCount", None, fmt="H", count_of="Values"),  # Word count (1-100)
         FieldLenField("ByteCount", None, fmt="B", length_of="Values", adjust=lambda pkt, x: x),
-        FieldListField("Values", [0x0000], ShortField("data", 0x0000), count_from=lambda pkt: pkt.WordCount)
+        FieldListField("RegistersValues", [0x0000], ShortField("data", 0x0000), count_from=lambda pkt: pkt.WordCount)
     ]
 
 
