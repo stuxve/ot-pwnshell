@@ -46,8 +46,15 @@ Once inside, use `help` to explore available commands and protocols.
 
 Planned and in-progress features:
 
-* [ ] Read Coils (Modbus)
-* [ ] Write Coils (Modbus)
+* [X] 0x01 Read Coils (Modbus)
+* [X] 0x02 Read Discrete Inputs (Modbus)
+* [X] 0x03 Read Holding Registers (Modbus)
+* [X] 0x04 Read Input Registers (Modbus)
+* [ ] 0x05 Write Single Coil (Modbus)
+* [ ] 0x06 Write Single Register (Modbus)
+* [ ] 0x0F Write Multiple Coils (Modbus)
+* [ ] 0x10 Write Multiple Registers (Modbus)
+* [ ] Advanced Modbus functions
 * [ ] Profinet device discovery
 * [ ] Siemens S7 client connection (`whoami`-style info)
 * [ ] Improved module auto-completion
