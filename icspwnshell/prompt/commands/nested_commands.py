@@ -1,7 +1,6 @@
+PROTOCOLS = ["modbus", "s7comm", "profinet"]
+
+
 NESTED_COMMANDS = {
-    "use-protocol": sorted({
-        "modbus",
-        "s7comm",
-        "profinet",
-    })
+    "use-protocol": {p: None for p in sorted(PROTOCOLS)}
 }
