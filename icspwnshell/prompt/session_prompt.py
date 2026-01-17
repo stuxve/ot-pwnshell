@@ -535,7 +535,8 @@ class SessionPrompt(CommandPrompt):
                                     if self.protocol in protocol_dict), [])
             module_names = [module['name'] for module in protocol_modules]
             nested_commands['use-module'] = {name: None for name in module_names}
-
+        if not self.protocol:
+            nested_commands['use-protocol'] = {p: None for p in sorted(['modbus', 's7comm', 'profinet'])}
         # Add module-specific options
         if self.module:
             # Find the options for the selected module
