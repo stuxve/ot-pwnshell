@@ -610,6 +610,7 @@ class SessionPrompt(CommandPrompt):
         print("Reading discrete inputs from Modbus device...")
         
         mb_cl = Modbus(self.target, self.port)
+        print(f"DEBUG: self.protocol = {self.protocol}")
         options = next(
         module["options"]
         for protocol_dict in modules
