@@ -199,9 +199,12 @@ class WriteMultipleCoilsResponse(Packet):
 class WriteMultipleRegistersRequest(Packet):
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),
-        FieldLenField("WordCount", None, fmt="H", count_of="Values"),  # Word count (1-100)
-        FieldLenField("ByteCount", None, fmt="B", length_of="Values", adjust=lambda pkt, x: x),
-        FieldListField("RegistersValues", [0x0000], ShortField("data", 0x0000), count_from=lambda pkt: pkt.WordCount)
+        # Points to RegistersValues to count how many items are in the list
+        FieldLenField("WordCount", None, fmt="H", count_of="RegistersValues"),
+        # Points to RegistersValues to calculate total bytes (2 bytes per register)
+        FieldLenField("ByteCount", None, fmt="B", length_of="RegistersValues"),
+        FieldListField("RegistersValues", [0x0000], ShortField("data", 0x0000), 
+                       count_from=lambda pkt: pkt.WordCount)
     ]
 
 

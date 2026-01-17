@@ -178,7 +178,7 @@ class Modbus():
         
         request = ModbusHeaderRequest(func_code=0x10) / WriteMultipleRegistersRequest(
             ReferenceNumber=start_address,
-            WordCount=len(values),
+            #WordCount=len(values),
             RegistersValues=values
         )
         
