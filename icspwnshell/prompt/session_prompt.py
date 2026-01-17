@@ -801,8 +801,8 @@ class SessionPrompt(CommandPrompt):
         address_value = next(o["value"] for o in options if o["name"] == "ADDRESS")
         value_value = next(o["value"] for o in options if o["name"] == "VALUE")
         
-        if value_value != 0 or value_value != 1:
-            self._print_error("VALUE must be 0 (OFF) or 1 (ON)")
+        if int(value_value) != 0 or int(value_value) != 1:
+            self._print_error("[!] VALUE must be 0 (OFF) or 1 (ON)")
             return
         
         if address_value < 0 or address_value > 0xFFFF:
