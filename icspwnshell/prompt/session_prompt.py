@@ -400,6 +400,15 @@ class SessionPrompt(CommandPrompt):
             # Here you would add the actual code to perform the Modbus write single holding register operation
             self.write_single_register()
 
+        if self.module == 'write_multiple_coils':
+            #print(f"Writing multiple coils to {self.get_option_value('target')} starting at address {self.get_option_value('start_address')} with values {self.get_option_value('values')} on port {self.get_option_value('port')}")
+            # Here you would add the actual code to perform the Modbus write multiple coils operation
+            self.write_multiple_coils()
+        if self.module == 'write_multiple_registers':
+            #print(f"Writing multiple holding registers to {self.get_option_value('target')} starting at address {self.get_option_value('start_address')} with values {self.get_option_value('values')} on port {self.get_option_value('port')}")
+            # Here you would add the actual code to perform the Modbus write multiple holding registers operation
+            self.write_multiple_registers()
+
         if self.module == 'search_profinet':
             print("[!] Searching for Profinet devices...")
             # Here you would add the actual code to perform the Profinet search operation
@@ -860,7 +869,7 @@ class SessionPrompt(CommandPrompt):
         value_value = next(o["value"] for o in options if o["name"] == "VALUES")
         value_list = list(value_value)
         value_value = [int(v) for v in value_list]
-        
+
         mb_cl = Modbus(self.target, self.port)
         mb_cl.write_multiple_coils(self.target, self.port, value_value)
     
