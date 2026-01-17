@@ -301,7 +301,7 @@ class SessionPrompt(CommandPrompt):
             self.protocol = None
             self.prompt = "[  <b>➜</b>   ]"
             #self.refresh_commands()
-            #self.update_nested_completer()
+            self.update_nested_completer()
             return
         self._print_error("No protocol or module to go back from.")
         
@@ -590,7 +590,7 @@ class SessionPrompt(CommandPrompt):
         data = mb_cl.read_coils( count_value, start_address_value)
         coils = self.decode_coils(data, count_value)
         print(f"[+] {self.target}:{self.port} - {count_value} coil values from address {start_address_value} :")
-        print(f"[+] {self.target}:{self.port} - {coils}\n")
+        print(f"[+] {self.target}:{self.port} - {coils}")
         print(f"[*] Read coils status operation completed.\n")
 
     def decode_coils(self, coils_bytes, count):
