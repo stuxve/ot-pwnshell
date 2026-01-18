@@ -55,6 +55,8 @@ Planned and in-progress features:
 * [ ] 0x06 Write Single Register (Modbus)
 * [ ] 0x0F Write Multiple Coils (Modbus)
 * [ ] 0x10 Write Multiple Registers (Modbus)
+* [X] Read Device Identification (Modbus)
+* [X] Modicon info for Shchneider products (Modbus)
 * [ ] Modbus banner grabbing
 * [ ] Advanced Modbus functions
 * [ ] Profinet device discovery
