@@ -57,7 +57,6 @@ Planned and in-progress features:
 * [ ] 0x10 Write Multiple Registers (Modbus)
 * [X] Read Device Identification (Modbus)
 * [X] Modicon info for Shchneider products (Modbus)
-* [ ] Modbus banner grabbing
 * [ ] Advanced Modbus functions
 * [ ] Profinet device discovery
 * [ ] Siemens S7 client connection (`whoami`-style info)
