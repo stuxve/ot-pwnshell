@@ -351,6 +351,33 @@ class GenericError(Packet):
     fields_desc = [ByteEnumField("exceptCode", 1, modbus_exceptions)]
 
 
+# PDU 0x2B
+class ReadDeviceIdentificationResponse(Packet):
+    fields_desc = [
+        ByteField("MEIType", 0x0E),
+        ByteField("ReadDeviceIDCode", 0x01),
+        ByteField("ConformityLevel", 0x01),
+        ByteField("MoreFollows", 0x00),
+        ByteField("NextObjectID", 0x00),
+        FieldLenField("NumberOfObjects", None, fmt="B", count_of="Objects"),
+        PacketListField("Objects", [], 
+                        lambda pkt, s: DeviceIDObject(s), 
+                        count_from=lambda pkt: pkt.NumberOfObjects)
+    ]
+class DeviceIDObject(Packet):
+    fields_desc = [
+        ByteField("ObjectID", 0x00),
+        ByteField("ObjectLength", None),
+        StrLenField("ObjectValue", "", length_from=lambda pkt: pkt.ObjectLength)
+    ]
+class ReadDeviceIdentificationRequest(Packet):
+    fields_desc = [
+        #ByteField("MEIType", 0x0E),
+        ByteField("ReadDeviceIDCode", 0x01),
+        ByteField("ObjectID", 0x00)
+    ]
+
+
 modbus_request_classes = {
     0x01: ReadCoilsRequest,
     0x02: ReadDiscreteInputsRequest,

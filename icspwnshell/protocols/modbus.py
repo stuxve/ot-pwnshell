@@ -272,7 +272,21 @@ class Modbus():
             print("Error in the response")
             return None
 
-
+    def read_device_identification(self, target, port, timeout=5):
+        self.init_connection(target, port, timeout)
+        # Implementation of Read Device Identification would go here
+        request = ModbusHeaderRequest(func_code=0x2B) / ReadDeviceIdentificationRequest() # Function code for Read Device Identification
+        self.send_packet(request)
+        response = self.receive_packet()
+        parsed_response = ModbusHeaderResponse(response)
+        if parsed_response.func_code == 0x2B:
+            device_id = parsed_response.payload.DeviceID
+            print(f"[!] Device Identification: {device_id}")
+            return device_id
+        else:
+            print("Error in the response")
+            return None
+        
     def send_packet(self, packet):
         self.connection.send(bytes(packet))
 

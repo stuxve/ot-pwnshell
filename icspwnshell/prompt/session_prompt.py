@@ -408,6 +408,10 @@ class SessionPrompt(CommandPrompt):
             #print(f"Writing multiple holding registers to {self.get_option_value('target')} starting at address {self.get_option_value('start_address')} with values {self.get_option_value('values')} on port {self.get_option_value('port')}")
             # Here you would add the actual code to perform the Modbus write multiple holding registers operation
             self.write_multiple_registers()
+        if self.module == 'read_device_identification':
+            #print(f"Reading device identification from {self.get_option_value('target')} on port {self.get_option_value('port')}")
+            # Here you would add the actual code to perform the Modbus read device identification operation
+            self.read_device_identification()
 
         if self.module == 'search_profinet':
             print("[!] Searching for Profinet devices...")
@@ -927,8 +931,16 @@ class SessionPrompt(CommandPrompt):
         mb_cl = Modbus(self.target, self.port)
         mb_cl.write_multiple_coils(self.target, self.port, address_value, value_value, bit_count)
     
+    def read_device_identification(self):
+        print("Reading device identification from Modbus device...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        data = mb_cl.read_device_identification(self.target, self.port)
 
-    
+        print(f"[+] Device Identification data from {self.target}:{self.port} :")
+        print(f"[+] {data}")
+        print(f"[*] Read device identification operation completed.\n")
+
 
     def masked_write_register(self):
         print("Performing masked write register on Modbus device...")
