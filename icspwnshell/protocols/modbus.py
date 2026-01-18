@@ -8,7 +8,8 @@ from .modbus_structure import (
     ReadFileRecordRequest, WriteFileRecordRequest, ReadFIFOQueueRequest
 )
 import socket
-
+import struct
+import re
 class Modbus():
     def __init__(self, target=None, port=None, timeout=5):
         self.pdu = None
@@ -279,7 +280,83 @@ class Modbus():
             offset = end
 
         return objects
+    
+    def build_pkt(self, unit_id, func_code, payload):
+        """Builds a Modbus TCP/UMAS Frame."""
+        length = 2 + len(payload)
+        header = struct.pack(">HHHB", self.trans_id, 0, length, unit_id)
+        self.trans_id += 1
+        return header + struct.pack("B", func_code) + payload
 
+    def send_and_recv(self, sock, func_code, payload):
+        pkt = self.build_pkt(0, func_code, payload)
+        sock.send(pkt)
+        return sock.recv(2048)
+    
+    def schneider_modicon_info(self, target, port, timeout=5):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(5)
+        
+        data = {
+            "vendor": "", "net": "", "cpu": "", "fw": "", "mem": "",
+            "proj_info": "", "rev": "", "mod": ""
+        }
+
+        try:
+            sock.connect((self.ip, self.port))
+
+            # 1. Hardware Info (Function 43)
+            res43 = self.send_and_recv(sock, 0x2B, b"\x0E\x03\x00")
+            if len(res43) > 10:
+                data["vendor"] = res43[16:36].decode(errors="ignore").strip()
+                data["net"] = res43[38:50].decode(errors="ignore").strip()
+                data["fw"] = res43[52:56].decode(errors="ignore").strip()
+
+            # 2. UMAS CPU Discovery (Function 90 / Code 0x02)
+            res_cpu = self.send_and_recv(sock, 0x5A, b"\x00\x02") 
+            if len(res_cpu) > 32:
+                # CPU Module string usually starts at 33
+                data["cpu"] = res_cpu[32:].split(b'\x00')[0].decode(errors="ignore").strip()
+            
+            # 3. Memory Card Discovery (Function 90 / Code 0x06 0x06)
+            # This is the specific "Messi" fix for the Memory Card
+            res_mem = self.send_and_recv(sock, 0x5A, b"\x00\x06\x06")
+            if len(res_mem) > 17:
+                # The card string usually starts at index 17
+                data["mem"] = res_mem[17:].split(b'\x00')[0].decode(errors="ignore").strip()
+            
+            # 4. UMAS Handshake & Session Poking
+            self.send_and_recv(sock, 0x5A, b"\x00\x01\x00") 
+            self.send_and_recv(sock, 0x5A, b"\x00\xFE\x00" + (b"\x54" * 249))
+
+            # 5. Project Metadata (UMAS 0x03) - Date and Revision
+            res_proj = self.send_and_recv(sock, 0x5A, b"\x00\x03\x00")
+            if len(res_proj) > 47:
+                s, m, h, d, M, y = struct.unpack("<BBBBBH", res_proj[37:44])
+                data["mod"] = f"{M}/{d}/{y} {h:02}:{m:02}:{s:02}"
+                r1, r2, r3 = struct.unpack("BBB", res_proj[44:47])
+                data["rev"] = f"{r3}.{r2}.{r1}"
+
+            # 6. Full Project Info (UMAS 0x20) - Extended strings
+            res_ext = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
+            
+            # Use regex to find all strings in the memory block
+            strings = re.findall(b"[\x20-\x7E]{3,}", res_ext[10:])
+            decoded_strings = [s.decode(errors='ignore').strip() for s in strings]
+            
+            # Filter out strings that are hardware identifiers to isolate Project info
+            filtered = [s for s in decoded_strings if s not in [data['vendor'], data['cpu'], data['fw']]]
+            if len(filtered) >= 2:
+                data["proj_info"] = f"{filtered[0]}   {filtered[1]}   {filtered[2] if len(filtered)>2 else ''}".strip()
+            elif len(filtered) == 1:
+                data["proj_info"] = filtered[0]
+
+            return data
+
+        except Exception as e:
+            return f"Error: {e}"
+        finally:
+            sock.close()
     def read_device_identification(self, target, port, timeout=5):
         self.init_connection(target, port, timeout)
 

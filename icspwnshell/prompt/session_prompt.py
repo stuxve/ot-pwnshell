@@ -421,6 +421,10 @@ class SessionPrompt(CommandPrompt):
             # Here you would add the actual code to perform the Modbus read device identification operation
             self.read_device_identification()
 
+        if self.module == 'schneider_modicon_info':
+            #print(f"Reading Schneider Modicon extended device info from {self.get_option_value('target')} on port {self.get_option_value('port')}")
+            # Here you would add the actual code to perform the Schneider Modicon info operation
+            self.schneider_modicon_info()
         if self.module == 'search_profinet':
             print("[!] Searching for Profinet devices...")
             # Here you would add the actual code to perform the Profinet search operation
@@ -865,7 +869,15 @@ class SessionPrompt(CommandPrompt):
                 return
         else:
             mb_cl.write_single_coil(self.target, self.port, address_value, value_value)
-    
+    def schneider_modicon_info(self):
+        print("Getting Schneider Modicon extended device info...")
+        
+        mb_cl = Modbus(self.target, self.port)
+        data = mb_cl.schneider_modicon_info(self.target, self.port)
+        print(f"[+] Schneider Modicon extended device info from {self.target}:{self.port} :")
+        print(f"[+] {data}")
+        print(f"[*] Schneider Modicon extended device info operation completed.\n")
+        
     def write_multiple_registers(self):
         print("Writing multiple registers to Modbus device...")
         print("Writing coil to Modbus device...")

@@ -36,7 +36,8 @@ MODULES = [
                     {'name': 'START_ADDRESS', 'desc': 'Starting address to write to', "mandatory":True, "value": 0},
                     {'name': 'VALUES', 'desc': 'List of values to write separated by commas 0,1,2,3,4', "mandatory":True, "value": "1,2,3,4,5" }
             ]},
-            {'name': 'read_device_identification', 'desc': 'Modbus Read Device Identification ', "options": []}
+            {'name': 'read_device_identification', 'desc': 'Modbus Read Device Identification ', "options": []},
+            {'name': 'schneider_modicon_info', 'desc': 'Schneider Modicon Info Module read_device_identification extended info', "options": []}
         ]
         
     },
