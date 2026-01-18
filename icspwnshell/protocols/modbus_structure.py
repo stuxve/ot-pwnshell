@@ -369,11 +369,10 @@ class ReadDeviceIdentificationResponse(Packet):
         ByteField("MoreFollows", 0x00),
         ByteField("NextObjectID", 0x00),
         ByteField("NumberOfObjects", 0x00),
-        PacketListField(
-            "Objects",
-            [],
-            DeviceIDObject,
-            count_from=lambda pkt: pkt.NumberOfObjects
+        StrLenField(
+            "ObjectsRaw",
+            b"",
+            length_from=lambda pkt: len(pkt.payload)
         )
     ]
 
