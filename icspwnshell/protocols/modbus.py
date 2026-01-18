@@ -315,8 +315,8 @@ class Modbus():
         objects = self.parse_device_id_objects(raw_objects)
 
         result = {
-            "conformity_level": resp.ConformityLevel,
-            "more_follows": bool(resp.MoreFollows),
+            "conformity_level": parsed_response.ConformityLevel,
+            "more_follows": bool(parsed_response.MoreFollows),
             "objects": {}
         }
 
