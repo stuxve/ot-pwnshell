@@ -282,6 +282,7 @@ class Modbus():
 
         # ✅ THIS is the important fix
         resp = ReadDeviceIdentificationResponse(parsed_response.payload.load)
+        print(f"DEBUG: {resp.Objects}")  # Debug print to check Objects attribute
 
         if not hasattr(resp, "Objects"):
             print("No Device Identification objects returned")
@@ -292,7 +293,6 @@ class Modbus():
             "more_follows": bool(resp.MoreFollows),
             "objects": {}
         }
-        print(f"DEBUG: {resp.Objects}")  # Debug print to check Objects attribute
         for obj in resp.Objects:
             try:
                 value = obj.ObjectValue.decode(errors="ignore")
