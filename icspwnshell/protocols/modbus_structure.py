@@ -31,7 +31,7 @@ class ModbusHeaderRequest(Packet):
         ShortField("trans_id", 0x0000),
         ShortField("proto_id", 0x0000),
         ShortField("length", None),
-        ByteField("unit_id", 0x00),
+        ByteField("unit_id", 0x01),
         ByteEnumField("func_code", 0x03, modbus_function_codes)
         ]
 
@@ -379,8 +379,8 @@ class ReadDeviceIdentificationResponse(Packet):
 class ReadDeviceIdentificationRequest(Packet):
     fields_desc = [
         ByteField("MEIType", 0x0E),
-        ByteField("ReadDeviceIDCode", 0x04),
-        ByteField("ObjectID", 0x05)
+        ByteField("ReadDeviceIDCode", 0x01),
+        ByteField("ObjectID", 0x00)
     ]
 
 
