@@ -34,7 +34,7 @@ class Modbus():
             self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.connection.settimeout(self.timeout)
             self.connection.connect((self.target, self.port))
-
+            self.trans_id = 1
     def read_coils(self, count, start_address):
         self.init_connection(self.target, self.port, self.timeout)
         
