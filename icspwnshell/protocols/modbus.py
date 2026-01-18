@@ -341,15 +341,18 @@ class Modbus():
             res_ext = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
             
             # Use regex to find all strings in the memory block
-            strings = re.findall(b"[\x20-\x7E]{3,}", res_ext[10:])
-            decoded_strings = [s.decode(errors='ignore').strip() for s in strings]
-            
+            #strings = re.findall(b"[\x20-\x7E]{3,}", res_ext[10:])
+            #decoded_strings = [s.decode(errors='ignore').strip() for s in strings]
+            strings = res_ext[100:]
+            decoded_string = strings.decode(errors='ignore', errors='ignore')
+            data["proj_info"] = decoded_string.strip()
+
             # Filter out strings that are hardware identifiers to isolate Project info
-            filtered = [s for s in decoded_strings if s not in [data['vendor'], data['cpu'], data['fw']]]
-            if len(filtered) >= 2:
-                data["proj_info"] = f"{filtered[0]}   {filtered[1]}   {filtered[2] if len(filtered)>2 else ''}".strip()
-            elif len(filtered) == 1:
-                data["proj_info"] = filtered[0]
+            #filtered = [s for s in decoded_strings if s not in [data['vendor'], data['cpu'], data['fw']]]
+            #if len(filtered) >= 2:
+            #    data["proj_info"] = f"{filtered[0]}   {filtered[1]}   {filtered[2] if len(filtered)>2 else ''}".strip()
+            #elif len(filtered) == 1:
+            #    data["proj_info"] = filtered[0]
 
             return data
 
