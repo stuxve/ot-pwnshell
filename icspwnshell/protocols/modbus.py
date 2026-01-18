@@ -303,7 +303,7 @@ class Modbus():
         }
 
         try:
-            sock.connect((self.ip, self.port))
+            sock.connect((target, port))
 
             # 1. Hardware Info (Function 43)
             res43 = self.send_and_recv(sock, 0x2B, b"\x0E\x03\x00")
