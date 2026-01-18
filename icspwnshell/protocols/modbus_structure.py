@@ -359,16 +359,23 @@ class ReadDeviceIdentificationResponse(Packet):
         ByteField("ConformityLevel", 0x01),
         ByteField("MoreFollows", 0x00),
         ByteField("NextObjectID", 0x00),
-        FieldLenField("NumberOfObjects", None, fmt="B", count_of="Objects"),
-        PacketListField("Objects", [], 
-                        lambda pkt, s: DeviceIDObject(s), 
-                        count_from=lambda pkt: pkt.NumberOfObjects)
+        ByteField("NumberOfObjects", 0x00),
+        PacketListField(
+            "Objects",
+            [],
+            DeviceIDObject,
+            count_from=lambda pkt: pkt.NumberOfObjects
+        )
     ]
 class DeviceIDObject(Packet):
     fields_desc = [
         ByteField("ObjectID", 0x00),
         ByteField("ObjectLength", None),
-        StrLenField("ObjectValue", "", length_from=lambda pkt: pkt.ObjectLength)
+        StrLenField(
+            "ObjectValue",
+            b"",
+            length_from=lambda pkt: pkt.ObjectLength
+        )
     ]
 class ReadDeviceIdentificationRequest(Packet):
     fields_desc = [

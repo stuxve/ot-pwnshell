@@ -257,27 +257,28 @@ class Modbus():
         else:
             print("Error in the response")
             return None
-    def read_device_identification(self, target, port, object_id, timeout=5):
+    def read_device_identification(self, target, port, timeout=5):
         self.init_connection(target, port, timeout)
         # Implementation of Read Device Identification would go here
         request = ModbusHeaderRequest(func_code=0x2B) / ReadDeviceIdentificationRequest() # Function code for Read Device Identification
         self.send_packet(request)
         response = self.receive_packet()
+        self.close_connection()
         parsed_response = ModbusHeaderResponse(response)
         if parsed_response.func_code == 0x2B:
-            if not hasattr(resp, "Objects"):
+            if not hasattr(parsed_response, "Objects"):
                 print("No Device Identification objects returned")
                 return None
             for obj in parsed_response.Objects:
                 print(f"Object ID: {obj.ObjectID}")
                 print(f"Value: {obj.ObjectValue.decode(errors='ignore')}")
             result = {
-                "conformity_level": resp.ConformityLevel,
-                "more_follows": bool(resp.MoreFollows),
+                "conformity_level": parsed_response.ConformityLevel,
+                "more_follows": bool(parsed_response.MoreFollows),
                 "objects": {}
             }
 
-            for obj in resp.Objects:
+            for obj in parsed_response.Objects:
                 try:
                     value = obj.ObjectValue.decode(errors="ignore")
                 except Exception:
