@@ -363,7 +363,8 @@ class SessionPrompt(CommandPrompt):
                     print(f"{'-' * 20} {'-' * 15} {'-' * 50}")
                     print(f"{'RHOST':<20} {self.target:<15} {'Target IP address':<50}")
                     print(f"{'RPORT':<20} {self.port:<15} {'Target port':<50}")
-                print(f"[!] The module {self.module} have no options. Just run it!\n")
+                else:
+                    print(f"[!] The module {self.module} have no options. Just run it!\n")
             return None
 
     # --------------------------------------------------------------- #
