@@ -379,8 +379,8 @@ class ReadDeviceIdentificationResponse(Packet):
 class ReadDeviceIdentificationRequest(Packet):
     fields_desc = [
         ByteField("MEIType", 0x0E),
-        ByteField("ReadDeviceIDCode", 0x03),
-        ByteField("ObjectID", 0x03)
+        ByteField("ReadDeviceIDCode", 0x04),
+        ByteField("ObjectID", 0x05)
     ]
 
 
