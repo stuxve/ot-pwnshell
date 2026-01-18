@@ -259,7 +259,7 @@ class Modbus():
             return None
         
 
-    def parse_device_id_objects(raw_bytes):
+    def parse_device_id_objects(self, raw_bytes):
         objects = []
         offset = 0
 
@@ -312,7 +312,7 @@ class Modbus():
             print("No Device Identification objects returned")
             return None
 
-        objects = parse_device_id_objects(raw_objects)
+        objects = self.parse_device_id_objects(raw_objects)
 
         result = {
             "conformity_level": resp.ConformityLevel,
