@@ -331,8 +331,8 @@ class Modbus():
 
         for obj_id, raw_val in objects:
             value = raw_val.decode(errors="ignore")
-            print(f"Object ID: {obj_id}")
-            print(f"Value: {value}")
+            #print(f"Object ID: {obj_id}")
+            #print(f"Value: {value}")
             obj_name = DEVICE_ID_OBJECT_NAMES.get(obj_id, f"Unknown_{obj_id}")
             result["objects"][obj_name] = value
 
