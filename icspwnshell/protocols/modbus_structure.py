@@ -372,7 +372,7 @@ class ReadDeviceIdentificationResponse(Packet):
         StrLenField(
             "ObjectsRaw",
             b"",
-            length_from=lambda pkt: len(pkt.payload)
+            length_from=lambda pkt: len(pkt.underlayer.load) - 6
         )
     ]
 

@@ -304,9 +304,10 @@ class Modbus():
             return None
 
         # Force correct PDU decoding
-        resp = ReadDeviceIdentificationResponse(parsed_response.payload.load)
+        raw_pdu = parsed_response.payload.load
 
-        raw_objects = resp.ObjectsRaw
+        # Skip 6-byte fixed header
+        raw_objects = raw_pdu[6:]
         if not raw_objects:
             print("No Device Identification objects returned")
             return None
