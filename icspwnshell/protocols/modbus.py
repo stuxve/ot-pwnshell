@@ -265,9 +265,26 @@ class Modbus():
         response = self.receive_packet()
         parsed_response = ModbusHeaderResponse(response)
         if parsed_response.func_code == 0x2B:
-            device_id = parsed_response.payload.DeviceID
-            print(f"[!] Device Identification: {device_id}")
-            return device_id
+            if not hasattr(resp, "Objects"):
+                print("No Device Identification objects returned")
+                return None
+            for obj in parsed_response.Objects:
+                print(f"Object ID: {obj.ObjectID}")
+                print(f"Value: {obj.ObjectValue.decode(errors='ignore')}")
+            result = {
+                "conformity_level": resp.ConformityLevel,
+                "more_follows": bool(resp.MoreFollows),
+                "objects": {}
+            }
+
+            for obj in resp.Objects:
+                try:
+                    value = obj.ObjectValue.decode(errors="ignore")
+                except Exception:
+                    value = repr(obj.ObjectValue)
+
+                result["objects"][obj.ObjectID] = value
+            return result
         else:
             print("Error in the response")
             return None
