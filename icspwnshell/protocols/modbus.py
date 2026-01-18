@@ -257,6 +257,29 @@ class Modbus():
         else:
             print("Error in the response")
             return None
+        
+
+    def parse_device_id_objects(raw_bytes):
+        objects = []
+        offset = 0
+
+        while offset + 2 <= len(raw_bytes):
+            obj_id = raw_bytes[offset]
+            obj_len = raw_bytes[offset + 1]
+
+            start = offset + 2
+            end = start + obj_len
+
+            if end > len(raw_bytes):
+                break
+
+            value = raw_bytes[start:end]
+            objects.append((obj_id, value))
+
+            offset = end
+
+        return objects
+
     def read_device_identification(self, target, port, timeout=5):
         self.init_connection(target, port, timeout)
 
@@ -280,29 +303,27 @@ class Modbus():
             print("Unexpected function code")
             return None
 
-        # ✅ THIS is the important fix
+        # Force correct PDU decoding
         resp = ReadDeviceIdentificationResponse(parsed_response.payload.load)
-        print(f"DEBUG: {resp.Objects}")  # Debug print to check Objects attribute
 
-        if not hasattr(resp, "Objects"):
+        raw_objects = resp.ObjectsRaw
+        if not raw_objects:
             print("No Device Identification objects returned")
             return None
+
+        objects = parse_device_id_objects(raw_objects)
 
         result = {
             "conformity_level": resp.ConformityLevel,
             "more_follows": bool(resp.MoreFollows),
             "objects": {}
         }
-        for obj in resp.Objects:
-            try:
-                value = obj.ObjectValue.decode(errors="ignore")
-            except Exception:
-                value = repr(obj.ObjectValue)
 
-            print(f"Object ID: {obj.ObjectID}")
+        for obj_id, raw_val in objects:
+            value = raw_val.decode(errors="ignore")
+            print(f"Object ID: {obj_id}")
             print(f"Value: {value}")
-
-            result["objects"][obj.ObjectID] = value
+            result["objects"][obj_id] = value
 
         return result
         
