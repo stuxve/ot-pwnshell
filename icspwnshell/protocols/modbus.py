@@ -1,6 +1,6 @@
 from .modbus_structure import (
     ModbusHeaderRequest, ModbusHeaderResponse,
-    ReadCoilsRequest, ReadDeviceIdentificationRequest, ReadDiscreteInputsRequest,
+    ReadCoilsRequest, ReadDeviceIdentificationRequest, ReadDeviceIdentificationResponse, ReadDiscreteInputsRequest,
     ReadHoldingRegistersRequest, ReadInputRegistersRequest,
     WriteSingleCoilRequest, WriteSingleRegisterRequest,
     WriteMultipleCoilsRequest, WriteMultipleRegistersRequest,
@@ -281,7 +281,7 @@ class Modbus():
             return None
 
         # ✅ THIS is the important fix
-        resp = parsed_response.payload
+        resp = ReadDeviceIdentificationResponse(parsed_response.payload.load)
 
         if not hasattr(resp, "Objects"):
             print("No Device Identification objects returned")
