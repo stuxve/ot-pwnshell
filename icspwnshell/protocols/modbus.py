@@ -292,7 +292,7 @@ class Modbus():
             "more_follows": bool(resp.MoreFollows),
             "objects": {}
         }
-
+        print(f"DEBUG: {resp.Objects}")  # Debug print to check Objects attribute
         for obj in resp.Objects:
             try:
                 value = obj.ObjectValue.decode(errors="ignore")
