@@ -380,7 +380,7 @@ class ReadDeviceIdentificationRequest(Packet):
     fields_desc = [
         ByteField("MEIType", 0x0E),
         ByteField("ReadDeviceIDCode", 0x03),
-        ByteField("ObjectID", 0x00)
+        ByteField("ObjectID", 0x03)
     ]
 
 
