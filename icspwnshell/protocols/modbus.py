@@ -303,20 +303,21 @@ class Modbus():
             print("Unexpected function code")
             return None
 
-        # Force correct PDU decoding
+        # raw_pdu is already defined as:
         raw_pdu = parsed_response.payload.load
 
-        # Skip 6-byte fixed header
-        raw_objects = raw_pdu[6:]
-        if not raw_objects:
-            print("No Device Identification objects returned")
-            return None
+        # Extract fields from the MEI 0x0E response
+        conformity_level = raw_pdu[3]
+        more_follows = bool(raw_pdu[4])
+        num_objects = raw_pdu[5]
 
+        # Parse objects
+        raw_objects = raw_pdu[6:]
         objects = self.parse_device_id_objects(raw_objects)
 
         result = {
-            "conformity_level": parsed_response.ConformityLevel,
-            "more_follows": bool(parsed_response.MoreFollows),
+            "conformity_level": conformity_level,
+            "more_follows": more_follows,
             "objects": {}
         }
 
