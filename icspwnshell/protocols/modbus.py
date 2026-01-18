@@ -302,7 +302,15 @@ class Modbus():
         if parsed_response.func_code != 0x2B:
             print("Unexpected function code")
             return None
-
+        DEVICE_ID_OBJECT_NAMES = {
+            0x00: "VendorName",
+            0x01: "ProductCode",
+            0x02: "MajorMinorRevision",
+            0x03: "VendorUrl",
+            0x04: "ProductName",
+            0x05: "ModelName",
+            0x06: "UserApplicationName",
+        }
         # raw_pdu is already defined as:
         raw_pdu = parsed_response.payload.load
 
@@ -325,7 +333,8 @@ class Modbus():
             value = raw_val.decode(errors="ignore")
             print(f"Object ID: {obj_id}")
             print(f"Value: {value}")
-            result["objects"][obj_id] = value
+            obj_name = DEVICE_ID_OBJECT_NAMES.get(obj_id, f"Unknown_{obj_id}")
+            result["objects"][obj_name] = value
 
         return result
         
