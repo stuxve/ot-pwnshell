@@ -344,8 +344,12 @@ class Modbus():
             #strings = re.findall(b"[\x20-\x7E]{3,}", res_ext[10:])
             #decoded_strings = [s.decode(errors='ignore').strip() for s in strings]
             strings = res_ext[100:]
-            decoded_string = strings.decode(errors='ignore')
-            data["proj_info"] = decoded_string.strip().replace('\x00', '')
+            decoded_string = strings.decode(errors='ignore').strip()
+            parts = [s.strip() for s in decoded_string.split('\x00') if s.strip()]
+
+            # 4. Remove duplicates while maintaining order
+            unique_parts = list(dict.fromkeys(parts))
+            data["proj_info"] = " ".join(unique_parts)
 
             # Filter out strings that are hardware identifiers to isolate Project info
             #filtered = [s for s in decoded_strings if s not in [data['vendor'], data['cpu'], data['fw']]]
