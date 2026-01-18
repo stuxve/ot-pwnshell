@@ -344,7 +344,7 @@ class Modbus():
             #strings = re.findall(b"[\x20-\x7E]{3,}", res_ext[10:])
             #decoded_strings = [s.decode(errors='ignore').strip() for s in strings]
             strings = res_ext[100:]
-            decoded_string = strings.decode(errors='ignore', errors='ignore')
+            decoded_string = strings.decode(errors='ignore')
             data["proj_info"] = decoded_string.strip()
 
             # Filter out strings that are hardware identifiers to isolate Project info
