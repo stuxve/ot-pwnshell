@@ -350,7 +350,16 @@ class ReadDeviceIdentificationRequest(Packet):
 class GenericError(Packet):
     fields_desc = [ByteEnumField("exceptCode", 1, modbus_exceptions)]
 
-
+class DeviceIDObject(Packet):
+    fields_desc = [
+        ByteField("ObjectID", 0x00),
+        ByteField("ObjectLength", None),
+        StrLenField(
+            "ObjectValue",
+            b"",
+            length_from=lambda pkt: pkt.ObjectLength
+        )
+    ]
 # PDU 0x2B
 class ReadDeviceIdentificationResponse(Packet):
     fields_desc = [
@@ -367,16 +376,7 @@ class ReadDeviceIdentificationResponse(Packet):
             count_from=lambda pkt: pkt.NumberOfObjects
         )
     ]
-class DeviceIDObject(Packet):
-    fields_desc = [
-        ByteField("ObjectID", 0x00),
-        ByteField("ObjectLength", None),
-        StrLenField(
-            "ObjectValue",
-            b"",
-            length_from=lambda pkt: pkt.ObjectLength
-        )
-    ]
+
 class ReadDeviceIdentificationRequest(Packet):
     fields_desc = [
         ByteField("MEIType", 0x0E),
