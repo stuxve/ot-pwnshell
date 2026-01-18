@@ -266,19 +266,19 @@ class Modbus():
         self.close_connection()
         parsed_response = ModbusHeaderResponse(response)
         if parsed_response.func_code == 0x2B:
-            if not hasattr(parsed_response, "Objects"):
+            if not hasattr(parsed_response.payload, "Objects"):
                 print("No Device Identification objects returned")
                 return None
-            for obj in parsed_response.Objects:
+            for obj in parsed_response.payload.Objects:
                 print(f"Object ID: {obj.ObjectID}")
                 print(f"Value: {obj.ObjectValue.decode(errors='ignore')}")
             result = {
-                "conformity_level": parsed_response.ConformityLevel,
-                "more_follows": bool(parsed_response.MoreFollows),
+                "conformity_level": parsed_response.payload.ConformityLevel,
+                "more_follows": bool(parsed_response.payload.MoreFollows),
                 "objects": {}
             }
 
-            for obj in parsed_response.Objects:
+            for obj in parsed_response.payload.Objects:
                 try:
                     value = obj.ObjectValue.decode(errors="ignore")
                 except Exception:
