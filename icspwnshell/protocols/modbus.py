@@ -259,36 +259,52 @@ class Modbus():
             return None
     def read_device_identification(self, target, port, timeout=5):
         self.init_connection(target, port, timeout)
-        # Implementation of Read Device Identification would go here
-        request = ModbusHeaderRequest(func_code=0x2B) / ReadDeviceIdentificationRequest() # Function code for Read Device Identification
+
+        request = (
+            ModbusHeaderRequest(func_code=0x2B) /
+            ReadDeviceIdentificationRequest()
+        )
+
         self.send_packet(request)
         response = self.receive_packet()
         self.close_connection()
+
         parsed_response = ModbusHeaderResponse(response)
-        if parsed_response.func_code == 0x2B:
-            if not hasattr(parsed_response.payload, "Objects"):
-                print("No Device Identification objects returned")
-                return None
-            for obj in parsed_response.payload.Objects:
-                print(f"Object ID: {obj.ObjectID}")
-                print(f"Value: {obj.ObjectValue.decode(errors='ignore')}")
-            result = {
-                "conformity_level": parsed_response.payload.ConformityLevel,
-                "more_follows": bool(parsed_response.payload.MoreFollows),
-                "objects": {}
-            }
 
-            for obj in parsed_response.payload.Objects:
-                try:
-                    value = obj.ObjectValue.decode(errors="ignore")
-                except Exception:
-                    value = repr(obj.ObjectValue)
-
-                result["objects"][obj.ObjectID] = value
-            return result
-        else:
-            print("Error in the response")
+        # --- Modbus exception handling ---
+        if parsed_response.func_code & 0x80:
+            print("Modbus exception response")
             return None
+
+        if parsed_response.func_code != 0x2B:
+            print("Unexpected function code")
+            return None
+
+        # ✅ THIS is the important fix
+        resp = parsed_response.payload
+
+        if not hasattr(resp, "Objects"):
+            print("No Device Identification objects returned")
+            return None
+
+        result = {
+            "conformity_level": resp.ConformityLevel,
+            "more_follows": bool(resp.MoreFollows),
+            "objects": {}
+        }
+
+        for obj in resp.Objects:
+            try:
+                value = obj.ObjectValue.decode(errors="ignore")
+            except Exception:
+                value = repr(obj.ObjectValue)
+
+            print(f"Object ID: {obj.ObjectID}")
+            print(f"Value: {value}")
+
+            result["objects"][obj.ObjectID] = value
+
+        return result
         
     def send_packet(self, packet):
         self.connection.send(bytes(packet))
