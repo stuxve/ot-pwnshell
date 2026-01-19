@@ -59,7 +59,7 @@ Planned and in-progress features:
 * [X] Modicon info for Shchneider products (Modbus)
 * [ ] Advanced Modbus functions
 * [ ] Profinet device discovery
-* [ ] Siemens S7 client connection (`whoami`-style info)
+* [ ] S7Comm client connection for info
 * [ ] Improved module auto-completion
 * [ ] More ICS protocol support
 
