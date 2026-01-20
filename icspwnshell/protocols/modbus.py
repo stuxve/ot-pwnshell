@@ -346,15 +346,19 @@ class Modbus():
                 if len(res_proj) > 50:
                     proj_name = res_proj[49:].split(b'\x00')[0].decode(errors="ignore").strip()
             # 6. Full Project Info (UMAS 0x20) - Extended strings
+            # This payload specifically targets the block containing the engineer's comments
             res_ext = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
+            proj_info = ""
+
             if res_ext and len(res_ext) > 180:
+                # size is at index 6 in the UMAS header
                 size = res_ext[6]
-                # Lua logic: iterate from 180 to size + 6
-                raw_segment = res_ext[180:size+7]
+                # Lua logic iterates from byte 180 to size + 6
+                raw_segment = res_ext[180 : size + 7]
                 
-                # Clean the bytes: replace nulls with spaces and collapse multiple spaces
-                cleaned = "".join([chr(b) if b != 0 else " " for b in raw_segment])
-                proj_info = " ".join(cleaned.split()).strip() # Removes the extra " - " trailing space
+                # Process bytes: Replace nulls with spaces to avoid string termination issues
+                chars = [chr(b) if b != 0 else " " for b in raw_segment]
+                proj_info = "".join(chars).strip()
                         
 
             # 7. Project Filename (UMAS 0x20 - Block 0x015A)
