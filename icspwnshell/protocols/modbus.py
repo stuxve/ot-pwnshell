@@ -342,21 +342,26 @@ class Modbus():
                 data["rev"] = f"{r3}.{r2}.{r1}"
 
             # 6. Full Project Info (UMAS 0x20) - Extended strings
-            is_bmx = data.get("cpu", "").startswith("BMX")
-            is_m340 = "M340" in data.get("cpu", "")
-            if is_bmx or is_m340:
-                res_ext = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
-                if res_ext and len(res_ext) > 200:
-                    size = res_ext[6]
-                    start = 180
-                    end = min(size + 6, len(res_ext))
+           
+            res_ext = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
+            project_info = ""
 
-                    project_info = ""
-                    for pos in range(start, end):
-                        b = res_ext[pos:pos+1]
-                        project_info += " " if b == b"\x00" else b.decode(errors="ignore")
+            size = res_ext[6]
+            pos = 180
+            end = size + 6
 
-                    data["proj_info"] = project_info.strip()
+            while pos <= end and pos < len(res_ext):
+                # Equivalent to bin.unpack("A")
+                tmp_proj_info = chr(res_ext[pos])
+                pos += 1
+
+                # Equivalent to stdnse.tohex(tmp_proj_info) == "00"
+                if tmp_proj_info == "\x00":
+                    project_info += " "
+                else:
+                    project_info += tmp_proj_info
+
+            project_info = project_info.strip()
             # Use regex to find all strings in the memory block
             #strings = re.findall(b"[\x20-\x7E]{3,}", res_ext[10:])
             #decoded_strings = [s.decode(errors='ignore').strip() for s in strings]
