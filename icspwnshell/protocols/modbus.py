@@ -349,12 +349,13 @@ class Modbus():
             res_ext = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
             if res_ext and len(res_ext) > 180:
                 size = res_ext[6]
-                info_bytes = []
-                for pos in range(180, min(size + 7, len(res_ext))):
-                    char = res_ext[pos]
-                    info_bytes.append(" " if char == 0x00 else chr(char))
-                proj_info = "".join(info_bytes).strip()
-            
+                # Lua logic: iterate from 180 to size + 6
+                raw_segment = res_ext[180:size+7]
+                
+                # Clean the bytes: replace nulls with spaces and collapse multiple spaces
+                cleaned = "".join([chr(b) if b != 0 else " " for b in raw_segment])
+                proj_info = " ".join(cleaned.split()).strip() # Removes the extra " - " trailing space
+                        
 
             # 7. Project Filename (UMAS 0x20 - Block 0x015A)
             # Note: This requires a DIFFERENT payload than res_ext
