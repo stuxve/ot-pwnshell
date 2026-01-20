@@ -344,7 +344,7 @@ class Modbus():
                 r1, r2, r3 = struct.unpack("BBB", res_proj[44:47])
                 data["rev"] = f"{r3}.{r2}.{r1}"
                 if len(res_proj) > 50:
-                    proj_name = res_proj[50:].split(b'\x00')[0].decode(errors="ignore").strip()
+                    proj_name = res_proj[49:].split(b'\x00')[0].decode(errors="ignore").strip()
             # 6. Full Project Info (UMAS 0x20) - Extended strings
             res_ext = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
             if res_ext and len(res_ext) > 180:
@@ -368,7 +368,7 @@ class Modbus():
                 size = res_ext[6]
                 info_bytes = []
                 # Loop from byte 180 to the end of the packet (size + 6 header offset)
-                for pos in range(179, min(size + 7, len(res_ext))):
+                for pos in range(180, min(size + 7, len(res_ext))):
                     char = res_ext[pos]
                     # Replace null bytes with spaces to match Lua 'stdnse.tohex == "00"' logic
                     info_bytes.append(" " if char == 0x00 else chr(char))
