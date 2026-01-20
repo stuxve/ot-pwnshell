@@ -319,9 +319,7 @@ class SessionPrompt(CommandPrompt):
             except ValueError:
                 self._print_error('Values must be integers or a binary string as appropriate')
                 return
-            if 
-            self._print_error('No module selected. Use the "use" command to select a module.')
-            return
+          
         # Find the option in the selected module
         option_found = False
         for option in self.options:
