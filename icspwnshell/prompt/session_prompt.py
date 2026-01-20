@@ -278,9 +278,48 @@ class SessionPrompt(CommandPrompt):
             if value < 0 or value > 65535:
                 self.port = value
                 print(f"[!] Set RPORT to {value}\n")
-
+        if variable.lower() == 'address':
+            try:
+                int_value = int(value)
+                if int_value < 0 or int_value > 65535:
+                    self._print_error('Address must be between 0 and 65535')
+                    return
+                else:
+                    value = int_value
+            except ValueError:
+                self._print_error('Address must be an integer')
+                return
+        if variable.lower() == 'values':
         # Check if a module is selected
-        if self.module == '':
+            try:
+                if self.module in ['write_multiple_registers']:
+                    # Expecting a comma-separated list of integers
+                    value = [int(v.strip()) for v in value.split(',')]
+                    for v in value:
+                        if v < 0 or v > 65535:
+                            self._print_error('All values must be between 0 and 65535')
+                            return
+                elif self.module in ['write_multiple_coils']:
+                    # Expecting a string of binary digits
+                    if not re.match(r'^[01]+$', value):
+                        self._print_error('Values must be a binary string (e.g., 010101)')
+                        return
+                else:
+                    # Single integer value
+                    int_value = int(value)
+                    if int_value < 0 or int_value > 65535:
+                        self._print_error('Value must be between 0 and 65535')
+                        return
+                    else:
+                        value = int_value
+                if variable.lower() == 'loop':
+                    if value.lower() != 'true' and value.lower() != 'false':
+                        self._print_error('Value for LOOP must be True or False')
+                        return
+            except ValueError:
+                self._print_error('Values must be integers or a binary string as appropriate')
+                return
+            if 
             self._print_error('No module selected. Use the "use" command to select a module.')
             return
         # Find the option in the selected module
@@ -291,6 +330,8 @@ class SessionPrompt(CommandPrompt):
                 option_found = True
                 print(f"[!] Set {variable} to {value} in module {self.module}\n")
                 break
+        if not option_found:
+            self._print_error(f'Option {variable} not found in module {self.module}')
     # --------------------------------------------------------------- #
     def _cmd_back(self, _):
         if self.module:  # Check if a module is selected
