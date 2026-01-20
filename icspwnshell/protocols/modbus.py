@@ -343,11 +343,23 @@ class Modbus():
 
             # 6. Full Project Info (UMAS 0x20) - Extended strings
             res_ext = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
-            project_filename = ""
-            if res_ext:
-                project_filename = self.unpack_z(res_ext, 14)
+            project_info = ""
 
-            data["proj_info"] = project_filename
+            if res_ext and len(res_ext) > 200:
+                size = res_ext[6]              # same as NSE
+                start = 180                    # Schneider fixed offset
+                end = min(size + 6, len(res_ext))
+
+                for pos in range(start, end):
+                    b = res_ext[pos:pos+1]
+                    if b == b"\x00":
+                        project_info += " "
+                    else:
+                        project_info += b.decode(errors="ignore")
+
+                project_info = project_info.strip()
+
+            data["proj_info"] = project_info
             # Use regex to find all strings in the memory block
             #strings = re.findall(b"[\x20-\x7E]{3,}", res_ext[10:])
             #decoded_strings = [s.decode(errors='ignore').strip() for s in strings]
