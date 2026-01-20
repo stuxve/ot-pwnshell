@@ -350,15 +350,24 @@ class Modbus():
             res_ext = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
             proj_info = ""
 
-            if res_ext and len(res_ext) > 180:
-                # size is at index 6 in the UMAS header
-                size = res_ext[6]
-                # Lua logic iterates from byte 180 to size + 6
-                raw_segment = res_ext[180 : size + 7]
+            if res_ext and len(res_ext) > 6:
+                # Size is at byte index 6
+                # In some firmwares, size is the data length, in others it's the whole packet
+                pkt_size = res_ext[6]
                 
-                # Process bytes: Replace nulls with spaces to avoid string termination issues
-                chars = [chr(b) if b != 0 else " " for b in raw_segment]
-                proj_info = "".join(chars).strip()
+                # The Lua script starts at 180. If that's too late for your specific PLC, 
+                # we'll slice from 14 (after header) to the end of the packet.
+                if len(res_ext) > 180:
+                    # Standard Modicon offset for user-defined strings
+                    raw_data = res_ext[180 : pkt_size + 7]
+                else:
+                    # Fallback if the packet is smaller than 180
+                    raw_data = res_ext[14:]
+
+                # Convert bytes to chars, replace nulls (0x00) with spaces
+                proj_info = "".join([chr(b) if b != 0 else " " for b in raw_data]).strip()
+                # Clean up double spaces from the null-replacement
+                proj_info = " ".join(proj_info.split())
                         
 
             # 7. Project Filename (UMAS 0x20 - Block 0x015A)
