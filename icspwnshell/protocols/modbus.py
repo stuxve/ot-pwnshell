@@ -292,7 +292,11 @@ class Modbus():
         pkt = self.build_pkt(0, func_code, payload)
         sock.send(pkt)
         return sock.recv(2048)
-    
+    def unpack_z(self, buf, offset):
+        end = buf.find(b"\x00", offset)
+        if end == -1:
+            return ""
+        return buf[offset:end].decode(errors="ignore")
     def schneider_modicon_info(self, target, port, timeout=5):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(5)
@@ -339,17 +343,26 @@ class Modbus():
 
             # 6. Full Project Info (UMAS 0x20) - Extended strings
             res_ext = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
-            
+            project_filename = ""
+            if res_ext:
+                project_filename = self.unpack_z(res_ext, 14)
+
+            data["proj_info"] = project_filename
             # Use regex to find all strings in the memory block
             #strings = re.findall(b"[\x20-\x7E]{3,}", res_ext[10:])
             #decoded_strings = [s.decode(errors='ignore').strip() for s in strings]
-            strings = res_ext[100:]
-            decoded_string = strings.decode(errors='ignore').strip()
-            parts = [s.strip() for s in decoded_string.split('\x00') if s.strip()]
+            #parse the different headers of unity modicon
+            
+            #res_ext = res_ext[9:]  # Skip the Modbus TCP header (first 9 bytes)
+            
+
+            #strings = res_ext[100:]
+            #decoded_string = strings.decode(errors='ignore').strip()
+            #parts = [s.strip() for s in decoded_string.split('\x00') if s.strip()]
 
             # 4. Remove duplicates while maintaining order
-            unique_parts = list(dict.fromkeys(parts))
-            data["proj_info"] = " ".join(unique_parts)
+            #unique_parts = list(dict.fromkeys(parts))
+            #data["proj_info"] = " ".join(unique_parts)
 
             # Filter out strings that are hardware identifiers to isolate Project info
             #filtered = [s for s in decoded_strings if s not in [data['vendor'], data['cpu'], data['fw']]]
