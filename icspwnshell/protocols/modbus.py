@@ -335,33 +335,32 @@ class Modbus():
 
             # 5. Project Metadata (UMAS 0x03) - Date and Revision
             res_proj = self.send_and_recv(sock, 0x5A, b"\x00\x03\x00")
+            proj_name = ""
+            proj_info = ""
+            proj_fn = ""
             if len(res_proj) > 47:
                 s, m, h, d, M, y = struct.unpack("<BBBBBH", res_proj[37:44])
                 data["mod"] = f"{M}/{d}/{y} {h:02}:{m:02}:{s:02}"
                 r1, r2, r3 = struct.unpack("BBB", res_proj[44:47])
                 data["rev"] = f"{r3}.{r2}.{r1}"
-
+                if len(res_proj) > 50:
+                    proj_name = res_proj[50:].split(b'\x00')[0].decode(errors="ignore").strip()
+            # 6. Full Project Info (UMAS 0x20) - Extended strings
+            res_ext = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
+            if res_ext and len(res_ext) > 180:
+                size = res_ext[6]
+                info_bytes = []
+                for pos in range(180, min(size + 7, len(res_ext))):
+                    char = res_ext[pos]
+                    info_bytes.append(" " if char == 0x00 else chr(char))
+                proj_info = "".join(info_bytes).strip()
             # 6. Full Project Info (UMAS 0x20) - Extended strings
            
-            res_ext = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
-            project_info = ""
+            res_fn = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
+            if len(res_fn) > 14:
+                proj_fn = res_fn[14:].split(b'\x00')[0].decode(errors="ignore").strip()
 
-            size = res_ext[6]
-            pos = 180
-            end = size + 6
-
-            while pos <= end and pos < len(res_ext):
-                # Equivalent to bin.unpack("A")
-                tmp_proj_info = chr(res_ext[pos])
-                pos += 1
-
-                # Equivalent to stdnse.tohex(tmp_proj_info) == "00"
-                if tmp_proj_info == "\x00":
-                    project_info += " "
-                else:
-                    project_info += tmp_proj_info
-
-            project_info = project_info.strip()
+            data["proj_info"] = f"{proj_name} - {proj_info} {proj_fn}".strip()
             # Use regex to find all strings in the memory block
             #strings = re.findall(b"[\x20-\x7E]{3,}", res_ext[10:])
             #decoded_strings = [s.decode(errors='ignore').strip() for s in strings]
