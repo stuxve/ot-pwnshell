@@ -584,6 +584,10 @@ class SessionPrompt(CommandPrompt):
             nested_commands['set'] = {name: None for name in option_names}
             nested_commands['set']['RHOST'] = None
             nested_commands['set']['RPORT'] = None
+            ## If option loop exists, add subcommands for options
+            if module_options['LOOP']:
+                nested_commands['set']['LOOP'] = {'TRUE': None, 'FALSE': None}
+
 
 
             
@@ -877,7 +881,7 @@ class SessionPrompt(CommandPrompt):
         print(f"[+] Schneider Modicon extended device info from {self.target}:{self.port} :")
         print(f"[+] {data}")
         print(f"[*] Schneider Modicon extended device info operation completed.\n")
-        
+
     def write_multiple_registers(self):
         print("Writing multiple registers to Modbus device...")
         print("Writing coil to Modbus device...")
