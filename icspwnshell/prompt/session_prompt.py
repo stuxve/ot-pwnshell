@@ -323,11 +323,6 @@ class SessionPrompt(CommandPrompt):
         # Find the option in the selected module
         option_found = False
         for option in self.options:
-            if option['name'].lower() == variable.lower():
-                option['value'] = value
-                option_found = True
-                print(f"[!] Set {variable} to {value} in module {self.module}\n")
-                break
             ## For IP options RHOST and RPORT
             if variable.upper() == 'RHOST':
                 option_found = True
@@ -337,6 +332,12 @@ class SessionPrompt(CommandPrompt):
                 option_found = True
                 print(f"[!] Set RPORT to {self.port} in module {self.module}\n")
                 break
+            if option['name'].lower() == variable.lower():
+                option['value'] = value
+                option_found = True
+                print(f"[!] Set {variable} to {value} in module {self.module}\n")
+                break
+            
         if not option_found:
             self._print_error(f'Option {variable} not found in module {self.module}')
     # --------------------------------------------------------------- #
