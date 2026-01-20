@@ -353,7 +353,7 @@ class Modbus():
             if res_ext and len(res_ext) > 6:
                 # Size is at byte index 6
                 # In some firmwares, size is the data length, in others it's the whole packet
-                pkt_size = res_ext[6]
+                pkt_size = len(res_ext) - 6  # Default to whole packet minus header
                 
                 # The Lua script starts at 180. If that's too late for your specific PLC, 
                 # we'll slice from 14 (after header) to the end of the packet.
