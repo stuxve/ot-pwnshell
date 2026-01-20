@@ -380,9 +380,6 @@ class Modbus():
                 proj_fn = res_fn_pkt[14:].split(b'\x00')[0].decode(errors="ignore").strip()
 
 
-            print(f"Project Name: {proj_name}")
-            print(f"Project Info: {proj_info}")
-            print(f"Project Filename: {proj_fn}")
             # Combine for the final output
             data["proj_info"] = f"{proj_name} - {proj_info} {proj_fn}".strip()
             # Use regex to find all strings in the memory block
