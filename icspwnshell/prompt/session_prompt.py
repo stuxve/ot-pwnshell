@@ -585,8 +585,9 @@ class SessionPrompt(CommandPrompt):
             nested_commands['set']['RHOST'] = None
             nested_commands['set']['RPORT'] = None
             ## If option loop exists, add subcommands for options
-            if module_options['LOOP']:
-                nested_commands['set']['LOOP'] = {'TRUE': None, 'FALSE': None}
+            has_loop = any(opt.get('name') == 'LOOP' for opt in module_options)
+            if has_loop:
+                nested_commands['set']['LOOP'] = {'COUNT': None, 'DELAY': None}
 
 
 
