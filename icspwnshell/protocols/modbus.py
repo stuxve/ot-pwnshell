@@ -354,42 +354,38 @@ class Modbus():
                     char = res_ext[pos]
                     info_bytes.append(" " if char == 0x00 else chr(char))
                 proj_info = "".join(info_bytes).strip()
-            # 6. Full Project Info (UMAS 0x20) - Extended strings
-           
-            #res_fn = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
-            if len(res_ext) > 14:
-                proj_fn = res_ext[14:].split(b'\x00')[0].decode(errors="ignore").strip()
-
+            # 6. Full Project Info (UMAS 0x20 - Block 0x64)
             res_ext = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
-
             proj_info = ""
+
             if res_ext and len(res_ext) > 180:
-                # size is at index 6 in the UMAS header
+                # In UMAS, the length field at index 6 determines how much data to read
                 size = res_ext[6]
                 info_bytes = []
-                # Loop from byte 180 to the end of the packet (size + 6 header offset)
+                
+                # The Lua script iterates from byte 180 to size + 6
+                # We use size + 7 for the range to include the last byte
                 for pos in range(180, min(size + 7, len(res_ext))):
-                    char = res_ext[pos]
-                    # Replace null bytes with spaces to match Lua 'stdnse.tohex == "00"' logic
-                    info_bytes.append(" " if char == 0x00 else chr(char))
-                proj_info = "".join(info_bytes).strip()
+                    char_byte = res_ext[pos]
+                    # Lua: if (tmp_proj_info == nil or stdnse.tohex(tmp_proj_info) == "00")
+                    if char_byte == 0:
+                        info_bytes.append(" ")
+                    else:
+                        info_bytes.append(chr(char_byte))
+                
+                # join and use ' '.join(proj_info.split()) to clean up multiple spaces
+                proj_info = " ".join("".join(info_bytes).split())
 
-            # 7. Project Filename (UMAS 0x20) - Requesting block 0x015A
-            # NOTE: To get the actual filename, you need to send a DIFFERENT payload 
-            # specifically targeting the filename memory block (0x015a).
+            # 7. Project Filename (UMAS 0x20 - Block 0x015A)
+            # Note: This requires a DIFFERENT payload than res_ext
             res_fn_pkt = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x5a\x01\x00\x00\xf6\x00")
-
             proj_fn = ""
+
             if res_fn_pkt and len(res_fn_pkt) > 14:
-                # The filename is null-terminated starting at byte 14
+                # Lua: bin.unpack("z", response, 14)
                 proj_fn = res_fn_pkt[14:].split(b'\x00')[0].decode(errors="ignore").strip()
 
-            ## Debugging output
-            print(f"Project Name: {proj_name}") # Assumes proj_name was parsed from Function 0x03
-            print(f"Project Info: {proj_info}")
-            print(f"Project Filename: {proj_fn}")
-
-
+            # Combine for the final output
             data["proj_info"] = f"{proj_name} - {proj_info} {proj_fn}".strip()
             # Use regex to find all strings in the memory block
             #strings = re.findall(b"[\x20-\x7E]{3,}", res_ext[10:])
