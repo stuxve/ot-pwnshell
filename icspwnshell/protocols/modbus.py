@@ -354,27 +354,7 @@ class Modbus():
                     char = res_ext[pos]
                     info_bytes.append(" " if char == 0x00 else chr(char))
                 proj_info = "".join(info_bytes).strip()
-            # 6. Full Project Info (UMAS 0x20 - Block 0x64)
-            res_ext = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
-            proj_info = ""
-
-            if res_ext and len(res_ext) > 180:
-                # In UMAS, the length field at index 6 determines how much data to read
-                size = res_ext[6]
-                info_bytes = []
-                
-                # The Lua script iterates from byte 180 to size + 6
-                # We use size + 7 for the range to include the last byte
-                for pos in range(180, min(size + 7, len(res_ext))):
-                    char_byte = res_ext[pos]
-                    # Lua: if (tmp_proj_info == nil or stdnse.tohex(tmp_proj_info) == "00")
-                    if char_byte == 0:
-                        info_bytes.append(" ")
-                    else:
-                        info_bytes.append(chr(char_byte))
-                
-                # join and use ' '.join(proj_info.split()) to clean up multiple spaces
-                proj_info = " ".join("".join(info_bytes).split())
+            
 
             # 7. Project Filename (UMAS 0x20 - Block 0x015A)
             # Note: This requires a DIFFERENT payload than res_ext
