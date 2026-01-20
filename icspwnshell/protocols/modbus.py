@@ -356,9 +356,15 @@ class Modbus():
                 proj_info = "".join(info_bytes).strip()
             # 6. Full Project Info (UMAS 0x20) - Extended strings
            
-            res_fn = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
-            if len(res_fn) > 14:
-                proj_fn = res_fn[14:].split(b'\x00')[0].decode(errors="ignore").strip()
+            #res_fn = self.send_and_recv(sock, 0x5A, b"\x00\x20\x00\x14\x00\x64\x00\x00\x00\xf6\x00")
+            if len(res_ext) > 14:
+                proj_fn = res_ext[14:].split(b'\x00')[0].decode(errors="ignore").strip()
+
+            ##Debugging output
+            print(f"Project Name: {proj_name}")
+            print(f"Project Info: {proj_info}")
+            print(f"Project Filename: {proj_fn} - {res_ext[14:].split(b'\x00')[0].decode(errors="ignore")}")
+
 
             data["proj_info"] = f"{proj_name} - {proj_info} {proj_fn}".strip()
             # Use regex to find all strings in the memory block
