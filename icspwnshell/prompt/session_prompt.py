@@ -587,7 +587,7 @@ class SessionPrompt(CommandPrompt):
             ## If option loop exists, add subcommands for options
             has_loop = any(opt.get('name') == 'LOOP' for opt in module_options)
             if has_loop:
-                nested_commands['set']['LOOP'] = {'COUNT': None, 'DELAY': None}
+                nested_commands['set']['LOOP'] = {'True': None, 'False': None}
 
 
 
