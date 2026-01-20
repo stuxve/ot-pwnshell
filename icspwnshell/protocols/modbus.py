@@ -368,7 +368,7 @@ class Modbus():
                 size = res_ext[6]
                 info_bytes = []
                 # Loop from byte 180 to the end of the packet (size + 6 header offset)
-                for pos in range(180, min(size + 7, len(res_ext))):
+                for pos in range(179, min(size + 7, len(res_ext))):
                     char = res_ext[pos]
                     # Replace null bytes with spaces to match Lua 'stdnse.tohex == "00"' logic
                     info_bytes.append(" " if char == 0x00 else chr(char))
