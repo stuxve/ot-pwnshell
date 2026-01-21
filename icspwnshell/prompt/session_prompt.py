@@ -191,6 +191,21 @@ class SessionPrompt(CommandPrompt):
     # ================================================================#
     # Command handlers                                                #
     # ================================================================#
+    def is_valid_ip_range(self, ip_range):
+        """
+        Check if an IP range is valid.
+        
+        Args:
+            ip_range (str): The IP range to be validated.
+        Returns:
+            bool: True if the IP range is valid, False otherwise.
+        """
+        try:
+            ipaddress.ip_network(ip_range, strict=False)
+            return True
+        except ValueError:
+            return False
+    
     def is_valid_ip(self, ip_address):
         """
         Check if an IP address is valid.
@@ -266,7 +281,14 @@ class SessionPrompt(CommandPrompt):
 
         variable = ''.join(tokens[0])
         value = ' '.join(tokens[1:])
-        
+        if variable.lower() == 'rhosts':
+            if not self.is_valid_ip_range(value):
+                self._print_error('Invalid IP range')
+                return
+            else:
+                print(f"[!] Set RHOSTS to {value}\n")
+                self.target = value
+                return
         if variable.lower() == 'rhost':
             if not self.is_valid_ip(value):
                 self._print_error('Invalid IP address')
