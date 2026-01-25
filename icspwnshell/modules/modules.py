@@ -9,7 +9,8 @@ MODULES = [
             ]},
             {'name': 'read_discrete_input', 'desc': 'Modbus Read Discrete Inputs ', "options": [
                 {'name': 'COUNT', 'desc': 'Number of discrete inputs to read', "mandatory":True, "value": 10},
-                {'name': 'START_ADDRESS', 'desc': 'Starting address to read from', "mandatory":True, "value": 0}
+                {'name': 'START_ADDRESS', 'desc': 'Starting address to read from', "mandatory":True, "value": 0},
+                {'rhosts': True}
             ]},
             {'name': 'read_holding_registers', 'desc': 'Modbus Read Holding Registers ', "options": [
                 {'name': 'COUNT', 'desc': 'Number of holding registers to read', "mandatory":True, "value": 10},
